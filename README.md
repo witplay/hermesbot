@@ -69,6 +69,21 @@ utils/models.js enhance.js markdown.js sha256.js theme.js util.js
 - No analytics, no third-party SDKs, no telemetry.
 - WeChat mini programs can't use `wss` sockets on some older base library versions; the chat page degrades to polling.
 
+## Need it deployed? · 商业支持
+
+The client is free and stays free. What people actually get stuck on is everything around it:
+a Hermes instance that really runs, WeChat 服务器域名 whitelisting, an AppID, HTTPS on your
+own domain. That part I do as a paid service, plus custom work on top of this code.
+
+| 服务 | 内容 |
+|---|---|
+| 部署上线 | Hermes + 本小程序全套跑通：服务器、域名、request 合法域名、AppID、HTTPS 证书 |
+| 白标改版 | 换名称 / 主题 / 图标 / 入口，做成你自有品牌的小程序 |
+| 二次开发 | 接你的业务接口、加页面、私有化改造 |
+
+**联系方式**：在本仓库开一个 issue，标题写 `[商业合作]` 或 `[commercial]`，48 小时内回复。
+Please open an issue titled `[commercial]` — that's the fastest channel.
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Use it, fork it, ship it commercially; keep the copyright notice.
