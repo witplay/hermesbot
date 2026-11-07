@@ -1,0 +1,21 @@
+<view class="cmsg" bindtap="onTap">
+  <view class="cmsg-rail {{item.ok ? 'ok' : 'fail'}}"></view>
+
+  <view class="cmsg-body">
+    <view class="cmsg-top">
+      <text class="cmsg-title">{{item.title}}</text>
+      <text class="cmsg-date">{{item.dateText}}</text>
+    </view>
+
+    <view class="cmsg-prev">{{item.preview}}</view>
+
+    <view class="cmsg-meta">
+      <text class="cmsg-status {{item.ok ? 'ok' : 'fail'}}">{{item.statusText}}</text>
+      <text wx:if="{{item.wsName}}" class="cmsg-ws">{{item.wsName}}</text>
+      <view class="cmsg-open">
+        <text class="cmsg-open-txt">详情</text>
+        <ic name="chevron-right" size="18" />
+      </view>
+    </view>
+  </view>
+</view>

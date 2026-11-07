@@ -1,0 +1,1229 @@
+<view class="app chat-app" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+  </view>
+
+  <view class="chat-shell">
+    <view class="chat-header">
+      <view style="height:{{statusBarHeight}}px;"></view>
+      <view class="nav-row" style="height:{{navRowHeight}}px;padding-right:{{capsulePad}}px;">
+        <view class="nav-icon plain head-btn" bindtap="onMenu" hover-class="tap-hover">
+          <ic name="menu" size="36" />
+        </view>
+        <view class="head-main" bindtap="onDetails" hover-class="tap-hover">
+          <view class="head-title ellipsis">{{title || '新会话'}}</view>
+          <view class="head-sub">
+            <view class="conn-dot conn-{{connState}}"></view>
+            <text class="head-ws">{{wsName || '默认工作区'}}</text>
+            <text wx:if="{{wsShort}}" class="head-path">{{wsShort}}</text>
+          </view>
+        </view>
+        <view class="nav-icon plain head-btn" bindtap="onFiles" hover-class="tap-hover">
+          <ic name="folder" size="34" />
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{connState !== 'open'}}" class="conn-bar">
+      <view class="dot {{connState === 'reconnecting' ? 'dot-warn' : 'dot-err'}} {{connState === 'connecting' ? 'dot-pulse' : ''}}"></view>
+      <text class="conn-text">{{connText}}</text>
+      <text wx:if="{{errorBanner}}" class="conn-detail ellipsis">{{errorBanner}}</text>
+      <view class="conn-retry" bindtap="onReconnect">重连</view>
+    </view>
+
+    <view class="thread-wrap">
+      <scroll-view
+        class="thread"
+        scroll-y
+        scroll-into-view="{{anchorId}}"
+        scroll-with-animation="{{!streaming}}"
+        lower-threshold="96"
+        bindscroll="onThreadScroll"
+        bindscrolltolower="onThreadReachBottom"
+        bindtouchstart="onThreadTouchStart"
+        bindtouchend="onThreadTouchEnd"
+        bindtouchcancel="onThreadTouchEnd"
+        enable-flex
+      >
+      <view class="thread-inner">
+        <view wx:if="{{loading}}" class="thread-loading">
+          <view class="skel skel-user"></view>
+          <view class="skel skel-ai"></view>
+          <view class="skel skel-ai short"></view>
+          <view class="skel skel-user small"></view>
+          <view class="skel skel-ai"></view>
+        </view>
+
+        <view wx:elif="{{!msgs.length}}" class="empty-hero">
+          <view class="empty-orb">
+            <view class="empty-avatar">
+              <image class="empty-avatar-img" src="/images/avatar.jpeg" mode="aspectFill" />
+            </view>
+            <view class="empty-ring"></view>
+          </view>
+          <view class="empty-title">开始对话</view>
+          <view class="empty-desc">{{endpointLabel}} · {{wsName || '默认工作区'}}</view>
+          <view class="suggests">
+            <view class="suggest" data-text="帮我梳理一下当前工作目录的结构和主要功能。" bindtap="onSuggest" hover-class="tap-hover">
+              <text>梳理当前工作目录的结构</text>
+              <ic name="chevron-right" size="24" />
+            </view>
+            <view class="suggest" data-text="看看最近的日志，有什么异常或值得关注的地方？" bindtap="onSuggest" hover-class="tap-hover">
+              <text>检查最近的日志异常</text>
+              <ic name="chevron-right" size="24" />
+            </view>
+            <view class="suggest" data-text="根据当前项目，给我一个可以立刻执行的优化建议。" bindtap="onSuggest" hover-class="tap-hover">
+              <text>给出下一步优化建议</text>
+              <ic name="chevron-right" size="24" />
+            </view>
+          </view>
+        </view>
+
+        <block wx:for="{{msgs}}" wx:key="id">
+          <view wx:if="{{item.role === 'user'}}" class="msg user-msg">
+            <view class="bubble-user">
+              <view wx:if="{{item.steer}}" class="steer-tag">
+                <view class="steer-tag-ico"><ic name="insert" size="20" /></view>
+                <text>插入到当前回合</text>
+              </view>
+              <view wx:if="{{item.images.length}}" class="user-imgs">
+                <image
+                  wx:for="{{item.images}}"
+                  wx:for-item="src"
+                  wx:for-index="ii"
+                  wx:key="*this"
+                  class="user-img"
+                  src="{{src}}"
+                  mode="aspectFill"
+                  data-id="{{item.id}}"
+                  data-index="{{ii}}"
+                  bindtap="onPreviewUser"
+                />
+              </view>
+              <view wx:if="{{item.text}}" class="user-text" user-select="{{true}}">{{item.text}}</view>
+              <view wx:if="{{item.files.length}}" class="user-files">
+                <view wx:for="{{item.files}}" wx:for-item="f" wx:key="*this" class="user-file">
+                  <ic name="file" size="22" />
+                  <text class="ellipsis">{{f}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="msg-foot right">
+              <view class="copy-btn" data-id="{{item.id}}" bindtap="onCopyMsg" hover-class="tap-hover">
+                <ic name="copy" size="24" />
+              </view>
+            </view>
+          </view>
+
+          <view wx:elif="{{item.role === 'assistant'}}" class="msg ai-msg {{item.turnHidden ? 'turn-hidden' : ''}}">
+            <view class="ai-head">
+              <view class="ai-mark">
+                <image class="ai-mark-img" src="/images/avatar.jpeg" mode="aspectFill" />
+              </view>
+              <text class="ai-name">HERMES</text>
+              <text wx:if="{{item.model || modelLabel}}" class="ai-model">{{item.model || modelLabel}}</text>
+              <view class="grow"></view>
+              <view wx:if="{{item.status === 'streaming'}}" class="ai-live">
+                <view class="dot dot-warn dot-pulse"></view>
+                <text>生成中</text>
+              </view>
+              <text wx:elif="{{item.status === 'error'}}" class="ai-err">未完成</text>
+            </view>
+
+            <view class="ai-body">
+              <block wx:if="{{flowMode}}">
+                <!-- 正在输出：默认简述，点底部状态栏可切到实时详情 -->
+                <block wx:if="{{item.status === 'streaming' && liveDetail}}">
+                  <view wx:if="{{!item.steps.length}}" class="tiny muted live-empty">暂无过程内容，正在输出…</view>
+                  <!-- 一次思考 + 它触发的工具调用成对展示；当前步展开，已完成步自动收起 -->
+                  <view wx:for="{{item.steps}}" wx:for-item="st" wx:key="key" class="reason-card">
+                    <view
+                      class="reason-head"
+                      data-id="{{item.id}}"
+                      data-index="{{index}}"
+                      bindtap="onToggleStep"
+                      hover-class="tap-hover"
+                    >
+                      <view class="reason-dot {{index === item.steps.length - 1 ? 'dot-pulse' : ''}}"></view>
+                      <text class="grow">{{st.think ? '思考' : '工作'}}</text>
+                      <text wx:if="{{st.tools.length}}" class="turn-meta">{{st.tools.length}} 步</text>
+                      <view class="chev">
+                        <ic name="{{st.show ? 'chevron-up' : 'chevron-down'}}" size="22" />
+                      </view>
+                    </view>
+                    <block wx:if="{{st.show}}">
+                      <view wx:if="{{st.think}}" class="reason-body" user-select="{{true}}">{{st.think}}</view>
+                      <view wx:if="{{st.tools.length}}" class="tool-list">
+                        <view wx:for="{{st.tools}}" wx:for-item="tool" wx:key="id" class="tool-row {{tool.done ? '' : 'running'}}">
+                          <view class="tool-dot"></view>
+                          <view class="tool-copy">
+                            <view class="tool-name-line">
+                              <text class="tool-name ellipsis">{{tool.name}}</text>
+                              <text wx:if="{{tool.durationText}}" class="tool-time">{{tool.durationText}}</text>
+                            </view>
+                            <text wx:if="{{tool.context}}" class="tool-ctx ellipsis">{{tool.context}}</text>
+                            <text wx:if="{{tool.summary}}" class="tool-sum" user-select="{{true}}">{{tool.summary}}</text>
+                          </view>
+                        </view>
+                      </view>
+                    </block>
+                  </view>
+                </block>
+
+                <!-- 只有一段输出：思考与工具一起收进一个折叠卡 -->
+                <block wx:if="{{item.status !== 'streaming' && !item.turnHidden && item.turnCount <= 1}}">
+                  <view wx:if="{{item.reasoning || item.tools.length}}" class="reason-card">
+                    <view class="reason-head" data-id="{{item.id}}" bindtap="onToggleReasoning" hover-class="tap-hover">
+                      <view class="reason-dot"></view>
+                      <text class="grow">{{item.reasoning ? '思考过程' : '工作过程'}}</text>
+                      <text wx:if="{{item.tools.length}}" class="turn-meta">{{item.tools.length}} 步</text>
+                      <view class="chev">
+                        <ic name="{{item.showReasoning ? 'chevron-up' : 'chevron-down'}}" size="22" />
+                      </view>
+                    </view>
+                    <block wx:if="{{item.showReasoning}}">
+                      <view wx:if="{{item.reasoning}}" class="reason-body" user-select="{{true}}">{{item.reasoning}}</view>
+                      <view wx:if="{{item.tools.length}}" class="tool-list">
+                        <view wx:for="{{item.tools}}" wx:for-item="tool" wx:key="id" class="tool-row {{tool.done ? '' : 'running'}}">
+                          <view class="tool-dot"></view>
+                          <view class="tool-copy">
+                            <view class="tool-name-line">
+                              <text class="tool-name ellipsis">{{tool.name}}</text>
+                              <text wx:if="{{tool.durationText}}" class="tool-time">{{tool.durationText}}</text>
+                            </view>
+                            <text wx:if="{{tool.context}}" class="tool-ctx ellipsis">{{tool.context}}</text>
+                            <text wx:if="{{tool.summary}}" class="tool-sum" user-select="{{true}}">{{tool.summary}}</text>
+                          </view>
+                        </view>
+                      </view>
+                    </block>
+                  </view>
+                </block>
+
+                <!-- 结果优先：多段输出才把这一轮的过程折成一处 -->
+                <view
+                  wx:if="{{item.status !== 'streaming' && !item.turnHidden && item.turnCount > 1}}"
+                  class="reason-card"
+                >
+                  <view class="reason-head" data-id="{{item.id}}" bindtap="onToggleTurn" hover-class="tap-hover">
+                    <view class="reason-dot"></view>
+                    <text class="grow">{{item.turnHasThink ? '思考' : '工作过程'}}</text>
+                    <text wx:if="{{item.turnCount > 1}}" class="turn-meta">{{item.turnCount}} 段</text>
+                    <view class="chev">
+                      <ic name="{{item.showReasoning ? 'chevron-up' : 'chevron-down'}}" size="22" />
+                    </view>
+                  </view>
+                  <view wx:if="{{item.showReasoning}}" class="turn-body">
+                    <!-- 按气泡逐个展开，不一次性铺开 -->
+                    <view wx:for="{{item.turnBubbles}}" wx:for-item="b" wx:key="key" class="turn-bubble">
+                      <view
+                        class="turn-bubble-head"
+                        data-id="{{item.id}}"
+                        data-index="{{index}}"
+                        bindtap="onToggleBubble"
+                        hover-class="tap-hover"
+                      >
+                        <view class="turn-node {{b.show ? 'on' : ''}}"></view>
+                        <text class="grow turn-bubble-title ellipsis">{{b.title}}</text>
+                        <text wx:if="{{b.meta}}" class="turn-meta">{{b.meta}}</text>
+                        <view class="chev">
+                          <ic name="{{b.show ? 'chevron-up' : 'chevron-down'}}" size="20" />
+                        </view>
+                      </view>
+                      <view wx:if="{{b.show}}" class="turn-bubble-body">
+                        <!-- 同样按「一次思考 + 它触发的工具调用」成对展开 -->
+                        <block wx:for="{{b.steps}}" wx:for-item="st" wx:key="key">
+                          <view wx:if="{{st.think}}" class="reason-card">
+                            <view class="reason-head">
+                              <view class="reason-dot"></view>
+                              <text class="grow">思考</text>
+                            </view>
+                            <view class="reason-body" user-select="{{true}}">{{st.think}}</view>
+                          </view>
+                          <view wx:if="{{st.tools.length}}" class="tool-list">
+                            <view wx:for="{{st.tools}}" wx:for-item="tool" wx:key="id" class="tool-row {{tool.done ? '' : 'running'}}">
+                              <view class="tool-dot"></view>
+                              <view class="tool-copy">
+                                <view class="tool-name-line">
+                                  <text class="tool-name ellipsis">{{tool.name}}</text>
+                                  <text wx:if="{{tool.durationText}}" class="tool-time">{{tool.durationText}}</text>
+                                </view>
+                                <text wx:if="{{tool.context}}" class="tool-ctx ellipsis">{{tool.context}}</text>
+                                <text wx:if="{{tool.summary}}" class="tool-sum" user-select="{{true}}">{{tool.summary}}</text>
+                              </view>
+                            </view>
+                          </view>
+                        </block>
+                        <view wx:if="{{b.text}}" class="reason-body turn-say" user-select="{{true}}">{{b.text}}</view>
+                      </view>
+                    </view>
+
+                    <view wx:if="{{item.turnBubbles.length}}" class="turn-actions">
+                      <view
+                        class="turn-act"
+                        data-id="{{item.id}}"
+                        data-mode="open"
+                        bindtap="onToggleAllBubbles"
+                        hover-class="tap-hover"
+                      >全部打开</view>
+                      <view
+                        class="turn-act"
+                        data-id="{{item.id}}"
+                        data-mode="close"
+                        bindtap="onToggleAllBubbles"
+                        hover-class="tap-hover"
+                      >全部折叠</view>
+                    </view>
+                  </view>
+                </view>
+              </block>
+
+              <block wx:else>
+                <view wx:if="{{item.reasoning}}" class="reason-card">
+                  <view class="reason-head" data-id="{{item.id}}" bindtap="onToggleReasoning">
+                    <view class="reason-dot {{item.status === 'streaming' ? 'dot-pulse' : ''}}"></view>
+                    <text class="grow">思考过程</text>
+                    <view class="chev">
+                      <ic name="{{item.showReasoning ? 'chevron-up' : 'chevron-down'}}" size="22" />
+                    </view>
+                  </view>
+                  <view wx:if="{{item.showReasoning}}" class="reason-body" user-select="{{true}}">{{item.reasoning}}</view>
+                </view>
+
+                <view wx:if="{{item.tools.length}}" class="tool-list">
+                  <view wx:for="{{item.tools}}" wx:for-item="tool" wx:key="id" class="tool-row {{tool.done ? '' : 'running'}}">
+                    <view class="tool-dot"></view>
+                    <view class="tool-copy">
+                      <view class="tool-name-line">
+                        <text class="tool-name ellipsis">{{tool.name}}</text>
+                        <text wx:if="{{tool.durationText}}" class="tool-time">{{tool.durationText}}</text>
+                      </view>
+                      <text wx:if="{{tool.context}}" class="tool-ctx ellipsis">{{tool.context}}</text>
+                      <text wx:if="{{tool.summary}}" class="tool-sum" user-select="{{true}}">{{tool.summary}}</text>
+                    </view>
+                  </view>
+                </view>
+              </block>
+
+              <view wx:if="{{item.text && (!item.blocks || item.status === 'streaming')}}" class="ai-text" user-select="{{true}}">{{item.text}}</view>
+              <block wx:elif="{{item.blocks}}">
+                <block wx:for="{{item.blocks}}" wx:for-item="blk" wx:key="key">
+                  <rich-text wx:if="{{blk.kind === 'rich'}}" class="ai-rich" nodes="{{blk.nodes}}" user-select="{{true}}"></rich-text>
+                  <view wx:elif="{{blk.kind === 'table'}}" class="md-table-wrap">
+                    <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="md-table-scroll">
+                      <view class="md-table" style="{{blk.tableStyle}}">
+                        <view class="md-tr md-tr-head">
+                          <view wx:for="{{blk.head}}" wx:for-item="cell" wx:key="key" class="md-cell" style="{{cell.style}}">{{cell.text}}</view>
+                        </view>
+                        <view wx:for="{{blk.rows}}" wx:for-item="row" wx:key="key" class="md-tr {{row.alt ? 'md-tr-alt' : ''}}">
+                          <view wx:for="{{row.cells}}" wx:for-item="cell" wx:key="key" class="md-cell" style="{{cell.style}}">{{cell.text}}</view>
+                        </view>
+                      </view>
+                    </scroll-view>
+                    <view wx:if="{{blk.scroll}}" class="md-table-tip">
+                      <view class="md-table-tip-bar"></view>
+                      <text>{{blk.hint}}</text>
+                    </view>
+                  </view>
+                </block>
+              </block>
+
+              <view wx:if="{{item.mdImages.length}}" class="md-imgs">
+                <view
+                  wx:for="{{item.mdImages}}"
+                  wx:for-item="img"
+                  wx:for-index="ii"
+                  wx:key="key"
+                  class="md-img-wrap"
+                  data-id="{{item.id}}"
+                  data-index="{{ii}}"
+                  bindtap="onPreviewMd"
+                >
+                  <image wx:if="{{img.displaySrc}}" class="md-img" src="{{img.displaySrc}}" mode="aspectFill" />
+                  <view wx:else class="md-img-ph">
+                    <ic name="{{img.failed ? 'refresh' : 'image'}}" size="40" />
+                    <text class="tiny">{{img.failed ? '图片载入失败' : '加载中…'}}</text>
+                    <text wx:if="{{img.failed}}" class="tiny md-img-name">{{img.name}}</text>
+                    <text wx:if="{{img.failed}}" class="tiny md-img-retry">点击重试</text>
+                  </view>
+                </view>
+              </view>
+
+              <view wx:if="{{item.fileCards.length}}" class="file-cards">
+                <view
+                  wx:for="{{item.fileCards}}"
+                  wx:for-item="card"
+                  wx:for-index="fi"
+                  wx:key="key"
+                  class="file-card"
+                >
+                  <view
+                    class="file-card-main"
+                    data-id="{{item.id}}"
+                    data-index="{{fi}}"
+                    bindtap="onFileCard"
+                    hover-class="tap-hover"
+                  >
+                    <view class="file-card-ico">
+                      <ic name="file" size="32" />
+                    </view>
+                    <view class="grow file-card-copy">
+                      <view class="file-card-name ellipsis">{{card.name}}</view>
+                      <view class="file-card-meta"><text class="file-ext">{{card.ext || 'file'}}</text> · {{card.external ? '点击复制链接' : '点击查看'}}</view>
+                    </view>
+                  </view>
+                  <view
+                    wx:if="{{!card.external}}"
+                    class="file-card-folder"
+                    data-id="{{item.id}}"
+                    data-index="{{fi}}"
+                    catchtap="onFileCardFolder"
+                    hover-class="tap-hover"
+                  >
+                    <ic name="folder" size="26" />
+                    <text class="file-card-folder-txt">目录</text>
+                  </view>
+                </view>
+              </view>
+
+              <view wx:if="{{item.status === 'streaming'}}" class="cursor"></view>
+            </view>
+
+            <view wx:if="{{item.text && item.status !== 'streaming'}}" class="msg-foot">
+              <view class="copy-btn" data-id="{{item.id}}" bindtap="onCopyMsg" hover-class="tap-hover">
+                <ic name="copy" size="24" />
+                <text>复制</text>
+              </view>
+              <text class="msg-time">{{item.timeText}}</text>
+            </view>
+          </view>
+
+          <view wx:else class="notice-row {{item.status === 'error' ? 'notice-err' : ''}}">{{item.text}}</view>
+        </block>
+
+        <view id="anchorA" class="anchor"></view>
+        <view id="anchorB" class="anchor"></view>
+      </view>
+      </scroll-view>
+
+      <view
+        wx:if="{{showScrollDown}}"
+        class="jump-bottom"
+        bindtap="onJumpToBottom"
+        hover-class="tap-hover"
+      >
+        <ic name="chevron-down" size="32" />
+      </view>
+    </view>
+
+    <!-- 结果优先：执行过程集中在这一栏，点击可在简述 / 实时详情之间切换 -->
+    <view wx:if="{{flowMode && liveStatus}}" class="live-bar" bindtap="onToggleLiveDetail" hover-class="tap-hover">
+      <view class="live-ico {{liveStatus.icon === 'refresh' ? 'spin' : ''}}">
+        <ic name="{{liveStatus.icon}}" size="26" />
+      </view>
+      <view class="grow live-copy">
+        <view class="live-line">
+          <text class="live-title ellipsis">{{liveStatus.title}}</text>
+          <text wx:if="{{liveStatus.remote}}" class="live-remote">其他端</text>
+          <text wx:if="{{liveStatus.time}}" class="live-time">{{liveStatus.time}}</text>
+        </view>
+        <text wx:if="{{liveStatus.sub}}" class="live-sub ellipsis">{{liveStatus.sub}}</text>
+      </view>
+      <text wx:if="{{liveStatus.step}}" class="live-step">{{liveStatus.step}}</text>
+      <view class="live-tap">
+        <text>{{liveDetail ? '收起' : '详情'}}</text>
+        <ic name="{{liveDetail ? 'chevron-up' : 'chevron-down'}}" size="20" />
+      </view>
+    </view>
+
+    <view wx:if="{{statusText && (!flowMode || !streaming)}}" class="status-line">
+      <view class="dot dot-warn dot-pulse"></view>
+      <text class="ellipsis">{{statusText}}</text>
+    </view>
+
+    <view wx:if="{{approval || clarify || secretPrompt}}" class="dock">
+      <scroll-view scroll-y class="dock-scroll">
+        <view wx:if="{{approval}}" class="req-card">
+          <view class="req-head">
+            <text class="req-badge danger">审批</text>
+            <text class="req-title">需要你的批准</text>
+          </view>
+          <view wx:if="{{approval.toolName}}" class="req-sub">{{approval.toolName}}</view>
+          <view wx:if="{{approval.command}}" class="req-code mono" user-select>{{approval.command}}</view>
+          <view wx:if="{{approval.description}}" class="req-desc">{{approval.description}}</view>
+          <view class="req-actions">
+            <view
+              wx:for="{{approval.choices}}"
+              wx:for-item="c"
+              wx:key="value"
+              class="btn req-btn {{c.primary ? 'btn-primary' : 'btn-danger'}}"
+              data-choice="{{c.value}}"
+              bindtap="onApproval"
+            >{{c.label}}</view>
+          </view>
+        </view>
+
+        <view wx:if="{{clarify}}" class="req-card">
+          <view class="req-head">
+            <text class="req-badge warn">补充</text>
+            <text class="req-title">需要补充信息</text>
+          </view>
+          <view wx:for="{{clarify.questions}}" wx:for-item="q" wx:for-index="qi" wx:key="qid" class="question">
+            <view class="req-desc">{{q.question}}</view>
+            <view wx:if="{{q.choices.length}}" class="req-choices">
+              <view
+                wx:for="{{q.choices}}"
+                wx:for-item="c"
+                wx:key="value"
+                class="chip {{c.on ? 'chip-active' : ''}}"
+                data-qindex="{{qi}}"
+                data-choice="{{c.value}}"
+                bindtap="onClarifyChoice"
+                hover-class="tap-hover"
+              >
+                <text class="chip-txt">{{c.label}}</text>
+              </view>
+            </view>
+            <input
+              wx:if="{{!q.choices.length}}"
+              class="req-input"
+              value="{{q.value}}"
+              data-qindex="{{qi}}"
+              bindinput="onClarifyInput"
+              placeholder="输入回答"
+              placeholder-class="ph"
+            />
+          </view>
+          <view class="req-actions">
+            <view class="btn btn-ghost req-btn" bindtap="onClarifySkip">跳过</view>
+            <view class="btn btn-primary req-btn" bindtap="onClarifySubmit">提交</view>
+          </view>
+        </view>
+
+        <view wx:if="{{secretPrompt}}" class="req-card">
+          <view class="req-head">
+            <text class="req-badge warn">凭据</text>
+            <text class="req-title">{{secretPrompt.label || '需要输入凭据'}}</text>
+          </view>
+          <view class="req-desc">{{secretPrompt.prompt}}</view>
+          <input
+            class="req-input"
+            password="{{true}}"
+            value="{{secretPrompt.value}}"
+            bindinput="onSecretInput"
+            placeholder="输入后提交"
+            placeholder-class="ph"
+          />
+          <view class="req-actions">
+            <view class="btn btn-ghost req-btn" bindtap="onSecretCancel">取消</view>
+            <view class="btn btn-primary req-btn" bindtap="onSecretSubmit">提交</view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view wx:if="{{!fullscreen}}" class="composer {{keyboardHeight ? 'kb-open' : ''}}">
+      <view class="composer-card {{inputFocus ? 'is-focus' : ''}}">
+        <view wx:if="{{queue.length}}" class="queue-panel">
+          <view class="queue-head">
+            <view class="queue-pulse {{queuePaused ? 'paused' : ''}}"></view>
+            <text class="queue-title">待发送 {{queue.length}} 条</text>
+            <text wx:if="{{queuePaused}}" class="queue-tag">已暂停</text>
+            <view class="grow"></view>
+            <view wx:if="{{queuePaused}}" class="queue-resume" bindtap="onQueueResume" hover-class="tap-hover">继续发送</view>
+            <text wx:else class="queue-hint">本轮结束后自动发送</text>
+          </view>
+          <view wx:for="{{queue}}" wx:key="id" class="queue-row">
+            <view class="queue-main">
+              <text class="queue-text">{{item.preview}}</text>
+              <view class="queue-meta">
+                <text wx:if="{{item.attachText}}">{{item.attachText}}</text>
+                <text wx:if="{{item.sending}}" class="queue-sending">发送中…</text>
+              </view>
+            </view>
+            <view class="queue-x" data-id="{{item.id}}" bindtap="onQueueRemove" hover-class="tap-hover">
+              <ic name="close" size="20" />
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{pendingImages.length || pendingFiles.length}}" class="pending-row">
+          <view
+            wx:for="{{pendingImages}}"
+            wx:key="path"
+            class="pending-thumb-wrap"
+            data-kind="image"
+            data-index="{{index}}"
+            bindtap="onPreviewPending"
+          >
+            <image class="pending-thumb" src="{{item.path}}" mode="aspectFill" />
+            <view
+              class="pending-x"
+              data-kind="image"
+              data-index="{{index}}"
+              catchtap="onRemovePending"
+            ><ic name="close" size="20" /></view>
+          </view>
+          <view
+            wx:for="{{pendingFiles}}"
+            wx:for-item="f"
+            wx:key="path"
+            class="pending-file"
+          >
+            <ic name="file" size="24" />
+            <text>{{f.name}}</text>
+            <view
+              class="pending-x inline"
+              data-kind="file"
+              data-index="{{index}}"
+              catchtap="onRemovePending"
+            ><ic name="close" size="18" /></view>
+          </view>
+        </view>
+
+        <view wx:if="{{recording || voiceBusy}}" class="voice-strip">
+          <view class="wave">
+            <view class="wave-bar"></view>
+            <view class="wave-bar"></view>
+            <view class="wave-bar"></view>
+            <view class="wave-bar"></view>
+          </view>
+          <text class="grow ellipsis">{{voiceBusy ? '正在识别语音…' : '录音中，点麦克风结束'}}</text>
+        </view>
+
+        <view wx:if="{{enhanceUndo}}" class="undo-strip">
+          <ic name="wand" size="26" />
+          <text class="undo-text grow ellipsis">已改写成结构化提示词</text>
+          <view class="undo-act" bindtap="onEnhanceUndo" hover-class="tap-hover">撤销</view>
+          <view class="undo-x" bindtap="onEnhanceUndoClose" hover-class="tap-hover">
+            <ic name="close" size="18" />
+          </view>
+        </view>
+
+        <view class="composer-field">
+          <textarea
+            class="composer-input"
+            style="height:{{inputHeight}}px;"
+            value="{{input}}"
+            focus="{{inputFocus}}"
+            auto-height="{{false}}"
+            maxlength="-1"
+            cursor-spacing="24"
+            adjust-position="{{false}}"
+            show-confirm-bar="{{false}}"
+            bindinput="onInput"
+            bindlinechange="onLineChange"
+            bindfocus="onFocus"
+            bindblur="onBlur"
+            bindkeyboardheightchange="onKeyboardHeight"
+            confirm-type="send"
+            confirm-hold="{{true}}"
+            bindconfirm="onSend"
+            placeholder="{{streaming ? (busyMode === 'steer' ? '插入到当前回合…' : '输入内容，本轮结束后自动发送…') : '给 Hermes 发消息…'}}"
+            placeholder-class="ph"
+          />
+          <!-- 右上角「扩大」：绝对定位在输入框留出的边列里，不占额外高度 -->
+          <view class="composer-expand" bindtap="onFullscreenOpen" hover-class="tap-hover">
+            <ic name="expand" size="32" />
+          </view>
+        </view>
+
+        <view class="composer-actions">
+          <view class="act-group">
+            <view class="act-btn" bindtap="onAttach" hover-class="tap-hover">
+              <ic name="plus" size="32" />
+            </view>
+            <view class="act-btn {{recording ? 'act-rec' : ''}}" bindtap="onVoice" hover-class="tap-hover">
+              <ic name="mic" size="32" />
+            </view>
+            <view
+              class="act-btn enhance-btn {{enhanceReady ? '' : 'act-unset'}} {{enhancing ? 'act-busy' : ''}}"
+              bindtap="onEnhanceTap"
+              bindlongpress="onEnhanceLongPress"
+              hover-class="tap-hover"
+            >
+              <view wx:if="{{enhancing}}" class="spinner enhance-spinner"></view>
+              <ic wx:else name="wand" size="32" />
+            </view>
+          </view>
+          <view class="model-btn" bindtap="onModelOpen" hover-class="tap-hover">
+            <view class="model-dot"></view>
+            <text class="model-btn-label">{{modelShort || '选择模型'}}</text>
+            <ic name="chevron-down" size="20" />
+          </view>
+          <view class="grow"></view>
+          <view class="send-group">
+            <view
+              wx:if="{{streaming}}"
+              class="mode-chip {{busyMode === 'steer' ? 'insert' : ''}}"
+              bindtap="onToggleBusyMode"
+              hover-class="tap-hover"
+            >
+              <ic name="{{busyMode === 'steer' ? 'insert' : 'queue'}}" size="24" />
+              <text class="mode-chip-txt">{{busyMode === 'steer' ? '插入' : '排队'}}</text>
+            </view>
+            <view wx:if="{{streaming}}" class="send-btn stop compact" bindtap="onStop" hover-class="tap-hover">
+              <ic name="stop" size="28" />
+            </view>
+            <view
+              wx:if="{{draftReady || !streaming}}"
+              class="send-btn {{draftReady ? '' : 'idle'}}"
+              bindtap="onSend"
+              hover-class="tap-hover"
+            >
+              <view wx:if="{{sending && !draftReady}}" class="spinner"></view>
+              <ic wx:else name="arrow-up" size="34" />
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{keyboardHeight}}" class="kb-spacer" style="height:{{keyboardHeight}}px;"></view>
+    </view>
+
+    <!-- 输入框全屏：与内联输入共用同一份草稿、附件与发送逻辑 -->
+    <view wx:if="{{fullscreen}}" class="fs-panel" style="padding-top:{{fsTopPad}}px;bottom:{{keyboardHeight}}px;">
+      <view class="fs-head">
+        <view class="fs-head-copy">
+          <view class="fs-title">全屏输入</view>
+          <view class="fs-sub">
+            {{streaming ? (busyMode === 'steer' ? '插入模式 · 发送即加入当前回合' : '排队模式 · 本轮结束后自动发送') : '还原后回到原输入框，内容与附件都会保留'}}
+          </view>
+        </view>
+        <view class="fs-head-tools">
+          <view
+            class="fs-history-btn {{inputCanUndo ? '' : 'act-disabled'}}"
+            bindtap="onInputUndo"
+            hover-class="tap-hover"
+            aria-label="撤销"
+          >
+            <ic name="undo" size="24" />
+            <text>撤销</text>
+          </view>
+          <view
+            class="fs-history-btn {{inputCanRedo ? '' : 'act-disabled'}}"
+            bindtap="onInputRedo"
+            hover-class="tap-hover"
+            aria-label="恢复"
+          >
+            <ic name="redo" size="24" />
+            <text>恢复</text>
+          </view>
+          <view class="fs-close" bindtap="onFullscreenClose" hover-class="tap-hover">
+            <ic name="collapse" size="26" />
+            <text>还原</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{queue.length}}" class="queue-panel fs-queue">
+        <view class="queue-head">
+          <view class="queue-pulse {{queuePaused ? 'paused' : ''}}"></view>
+          <text class="queue-title">待发送 {{queue.length}} 条</text>
+          <text wx:if="{{queuePaused}}" class="queue-tag">已暂停</text>
+          <view class="grow"></view>
+          <view wx:if="{{queuePaused}}" class="queue-resume" bindtap="onQueueResume" hover-class="tap-hover">继续发送</view>
+          <text wx:else class="queue-hint">本轮结束后自动发送</text>
+        </view>
+        <view wx:for="{{queue}}" wx:key="id" class="queue-row">
+          <view class="queue-main">
+            <text class="queue-text">{{item.preview}}</text>
+            <view class="queue-meta">
+              <text wx:if="{{item.attachText}}">{{item.attachText}}</text>
+              <text wx:if="{{item.sending}}" class="queue-sending">发送中…</text>
+            </view>
+          </view>
+          <view class="queue-x" data-id="{{item.id}}" bindtap="onQueueRemove" hover-class="tap-hover">
+            <ic name="close" size="20" />
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{pendingImages.length || pendingFiles.length}}" class="pending-row">
+        <view
+          wx:for="{{pendingImages}}"
+          wx:key="path"
+          class="pending-thumb-wrap"
+          data-kind="image"
+          data-index="{{index}}"
+          bindtap="onPreviewPending"
+        >
+          <image class="pending-thumb" src="{{item.path}}" mode="aspectFill" />
+          <view
+            class="pending-x"
+            data-kind="image"
+            data-index="{{index}}"
+            catchtap="onRemovePending"
+          ><ic name="close" size="20" /></view>
+        </view>
+        <view
+          wx:for="{{pendingFiles}}"
+          wx:for-item="f"
+          wx:key="path"
+          class="pending-file"
+        >
+          <ic name="file" size="24" />
+          <text>{{f.name}}</text>
+          <view
+            class="pending-x inline"
+            data-kind="file"
+            data-index="{{index}}"
+            catchtap="onRemovePending"
+          ><ic name="close" size="18" /></view>
+        </view>
+      </view>
+
+      <view wx:if="{{recording || voiceBusy}}" class="voice-strip">
+        <view class="wave">
+          <view class="wave-bar"></view>
+          <view class="wave-bar"></view>
+          <view class="wave-bar"></view>
+          <view class="wave-bar"></view>
+        </view>
+        <text class="grow ellipsis">{{voiceBusy ? '正在识别语音…' : '录音中，点麦克风结束'}}</text>
+      </view>
+
+      <view wx:if="{{enhanceUndo}}" class="undo-strip">
+        <ic name="wand" size="26" />
+        <text class="undo-text grow ellipsis">已改写成结构化提示词</text>
+        <view class="undo-act" bindtap="onEnhanceUndo" hover-class="tap-hover">撤销</view>
+        <view class="undo-x" bindtap="onEnhanceUndoClose" hover-class="tap-hover">
+          <ic name="close" size="18" />
+        </view>
+      </view>
+
+      <textarea
+        class="composer-input fs-input"
+        style="height:{{fsInputHeight}}px;"
+        value="{{input}}"
+        focus="{{fullscreenFocus}}"
+        auto-height="{{false}}"
+        maxlength="-1"
+        cursor-spacing="24"
+        adjust-position="{{false}}"
+        show-confirm-bar="{{false}}"
+        bindinput="onInput"
+        bindfocus="onFocus"
+        bindblur="onBlur"
+        bindkeyboardheightchange="onKeyboardHeight"
+        confirm-type="send"
+        confirm-hold="{{true}}"
+        bindconfirm="onSend"
+        placeholder="给 Hermes 发消息…"
+        placeholder-class="ph"
+      />
+
+      <view class="composer-actions fs-actions">
+        <view class="act-group">
+          <view class="act-btn" bindtap="onAttach" hover-class="tap-hover">
+            <ic name="plus" size="32" />
+          </view>
+          <view class="act-btn {{recording ? 'act-rec' : ''}}" bindtap="onVoice" hover-class="tap-hover">
+            <ic name="mic" size="32" />
+          </view>
+          <view
+            class="act-btn enhance-btn {{enhanceReady ? '' : 'act-unset'}} {{enhancing ? 'act-busy' : ''}}"
+            bindtap="onEnhanceTap"
+            bindlongpress="onEnhanceLongPress"
+            hover-class="tap-hover"
+          >
+            <view wx:if="{{enhancing}}" class="spinner enhance-spinner"></view>
+            <ic wx:else name="wand" size="32" />
+          </view>
+        </view>
+        <view class="model-btn" bindtap="onModelOpen" hover-class="tap-hover">
+          <view class="model-dot"></view>
+          <text class="model-btn-label">{{modelShort || '选择模型'}}</text>
+          <ic name="chevron-down" size="20" />
+        </view>
+        <view class="grow"></view>
+        <view class="send-group">
+          <view
+            wx:if="{{streaming}}"
+            class="mode-chip {{busyMode === 'steer' ? 'insert' : ''}}"
+            bindtap="onToggleBusyMode"
+            hover-class="tap-hover"
+          >
+            <ic name="{{busyMode === 'steer' ? 'insert' : 'queue'}}" size="24" />
+            <text class="mode-chip-txt">{{busyMode === 'steer' ? '插入' : '排队'}}</text>
+          </view>
+          <view wx:if="{{streaming}}" class="send-btn stop compact" bindtap="onStop" hover-class="tap-hover">
+            <ic name="stop" size="28" />
+          </view>
+          <view
+            wx:if="{{draftReady || !streaming}}"
+            class="send-btn {{draftReady ? '' : 'idle'}}"
+            bindtap="onSend"
+            hover-class="tap-hover"
+          >
+            <view wx:if="{{sending && !draftReady}}" class="spinner"></view>
+            <ic wx:else name="arrow-up" size="34" />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{detailsOpen}}" class="mask" bindtap="onDetailsClose"></view>
+  <view wx:if="{{detailsOpen}}" class="sheet-panel details-sheet" catchtouchmove="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">会话信息</view>
+      <view class="sheet-close" bindtap="onDetailsClose">
+        <ic name="close" size="30" />
+      </view>
+    </view>
+
+    <scroll-view scroll-y class="details-scroll">
+      <view class="sheet-label">标题</view>
+      <view class="rename-row">
+        <input
+          class="details-input"
+          value="{{detailsTitle}}"
+          bindinput="onDetailsTitle"
+          placeholder="给会话起个名字"
+          placeholder-class="ph"
+          maxlength="80"
+        />
+        <view class="rename-btn {{details.canRename ? '' : 'dim'}}" bindtap="onDetailsSave">{{detailsSaving ? '保存中' : '保存'}}</view>
+      </view>
+      <view wx:if="{{!details.canRename}}" class="rename-hint">会话建立后可重命名</view>
+
+      <view class="sheet-label">对话展示</view>
+      <view class="mode-pick">
+        <view
+          class="mode-opt {{flowMode ? 'on' : ''}} {{streaming || sending ? 'disabled' : ''}}"
+          data-mode="flow"
+          bindtap="onDisplayMode"
+          hover-class="{{streaming || sending ? 'none' : 'tap-hover'}}"
+        >
+          <view class="mode-opt-title">
+            <text class="grow">结果优先</text>
+            <view wx:if="{{flowMode}}" class="mode-opt-check"><ic name="check" size="24" /></view>
+          </view>
+          <view class="mode-opt-desc">新会话默认收起，只显示输出正文；点状态栏「详情」可展开思考与工具调用，选择会按会话记住。</view>
+        </view>
+        <view
+          class="mode-opt {{flowMode ? '' : 'on'}} {{streaming || sending ? 'disabled' : ''}}"
+          data-mode="classic"
+          bindtap="onDisplayMode"
+          hover-class="{{streaming || sending ? 'none' : 'tap-hover'}}"
+        >
+          <view class="mode-opt-title">
+            <text class="grow">完整过程</text>
+            <view wx:if="{{!flowMode}}" class="mode-opt-check"><ic name="check" size="24" /></view>
+          </view>
+          <view class="mode-opt-desc">保留原有体验：思考与工具调用随输出实时展开在对话气泡中。</view>
+        </view>
+      </view>
+      <view wx:if="{{streaming || sending}}" class="mode-lock-hint">
+        <view class="mode-lock-ico"><ic name="info" size="20" /></view>
+        <text>AI 正在输出，结束后可切换展示模式</text>
+      </view>
+
+      <view class="sheet-label">详情</view>
+      <view class="info-list">
+        <view class="info-row copyable" data-text="{{details.id}}" bindtap="onCopyText">
+          <text class="info-k">会话 ID</text>
+          <view class="info-v-wrap">
+            <text class="info-v mono">{{details.id}}</text>
+            <ic name="copy" size="22" />
+          </view>
+        </view>
+        <view class="info-row copyable" data-text="{{details.ws}}" bindtap="onCopyText">
+          <text class="info-k">工作目录</text>
+          <view class="info-v-wrap">
+            <text class="info-v">{{details.ws}}</text>
+            <ic name="copy" size="22" />
+          </view>
+        </view>
+        <view class="info-row model-info" bindtap="onModelFromDetails">
+          <text class="info-k">模型</text>
+          <view class="info-v-wrap">
+            <text class="info-v">{{details.model}}</text>
+            <ic name="chevron-right" size="22" />
+          </view>
+        </view>
+        <view class="info-row">
+          <text class="info-k">来源</text>
+          <text class="info-v">{{details.source}} · {{details.channel}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-k">状态</text>
+          <text class="info-v">{{details.status}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-k">创建时间</text>
+          <text class="info-v">{{details.created}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-k">最近更新</text>
+          <text class="info-v">{{details.updated}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-k">消息数</text>
+          <text class="info-v">{{details.messages}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-k">上下文</text>
+          <text class="info-v">{{details.tokens}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-k">Profile</text>
+          <text class="info-v">{{details.profile}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="sheet-actions">
+      <view class="btn btn-ghost" bindtap="onDetailsTheme">
+        <ic name="theme" size="28" />
+        <text class="btn-txt">主题外观</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{modelOpen}}" class="mask" bindtap="onModelClose"></view>
+  <view wx:if="{{modelOpen}}" class="sheet-panel model-sheet" catchtouchmove="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">切换模型</view>
+      <view class="sheet-head-actions">
+        <view class="model-refresh {{modelLoading ? 'spin' : ''}}" bindtap="onModelRefresh">
+          <ic name="refresh" size="26" />
+        </view>
+        <view class="sheet-close" bindtap="onModelClose">
+          <ic name="close" size="30" />
+        </view>
+      </view>
+    </view>
+    <view class="model-sub">
+      <text class="ellipsis">当前：{{modelLabel || '读取中'}}</text>
+      <text wx:if="{{modelSwitching}}" class="model-sub-busy">切换中…</text>
+    </view>
+    <view class="reason-pick {{reasoningAvailable ? '' : 'off'}}">
+      <view class="reason-pick-head">
+        <text class="reason-pick-title">推理强度</text>
+        <text wx:if="{{reasoningBusy}}" class="reason-pick-cur">设置中…</text>
+        <text wx:elif="{{!reasoningAvailable}}" class="reason-pick-cur">该模型不支持</text>
+        <text wx:else class="reason-pick-cur">{{reasoningLabel || '默认'}}</text>
+      </view>
+      <scroll-view wx:if="{{reasoningAvailable}}" scroll-x class="reason-levels" enhanced show-scrollbar="{{false}}">
+        <view
+          wx:for="{{reasoningLevels}}"
+          wx:key="id"
+          class="reason-level {{item.id === reasoningLevel ? 'on' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onReasoningPick"
+        >{{item.label}}</view>
+      </scroll-view>
+    </view>
+    <view class="model-search-box">
+      <ic name="search" size="26" />
+      <input
+        class="model-search-input"
+        value="{{modelSearch}}"
+        bindinput="onModelSearch"
+        placeholder="搜索全部模型"
+        placeholder-class="ph"
+        confirm-type="search"
+      />
+      <view wx:if="{{modelSearch}}" class="model-search-clear" bindtap="onModelSearchClear">
+        <ic name="close" size="20" />
+      </view>
+    </view>
+    <scroll-view scroll-x class="model-providers" enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{modelProviders}}"
+        wx:key="slug"
+        class="model-prov {{item.slug === modelProvider ? 'on' : ''}}"
+        data-slug="{{item.slug}}"
+        bindtap="onModelProvider"
+      >
+        <view wx:if="{{item.current}}" class="model-prov-dot"></view>
+        <text>{{item.name}}</text>
+        <text class="model-prov-count">{{item.total}}</text>
+      </view>
+    </scroll-view>
+    <scroll-view scroll-y class="model-list-scroll" enhanced show-scrollbar="{{false}}">
+      <view wx:if="{{modelLoading && !modelProviders.length}}" class="model-state">
+        <view class="model-spinner"></view>
+        <text>正在加载模型…</text>
+      </view>
+      <view wx:elif="{{modelError}}" class="model-state">
+        <text class="model-state-text">{{modelError}}</text>
+        <view class="model-retry" bindtap="onModelRefresh">重新加载</view>
+      </view>
+      <view wx:elif="{{!modelList.length}}" class="model-state">
+        <text>没有匹配的模型</text>
+      </view>
+      <view wx:else class="model-list">
+        <view
+          wx:for="{{modelList}}"
+          wx:key="key"
+          class="model-row {{item.current ? 'on' : ''}}"
+          data-model="{{item.model}}"
+          data-slug="{{item.slug}}"
+          data-current="{{item.current}}"
+          bindtap="onModelPick"
+          hover-class="tap-hover"
+        >
+          <view class="model-row-copy">
+            <text class="model-row-name">{{item.label}}</text>
+            <text wx:if="{{item.sub}}" class="model-row-sub">{{item.sub}}</text>
+          </view>
+          <view wx:if="{{item.reasoning || item.fast}}" class="model-tags">
+            <text wx:if="{{item.reasoning}}" class="model-tag">推理</text>
+            <text wx:if="{{item.fast}}" class="model-tag fast">快速</text>
+          </view>
+          <view wx:if="{{item.current}}" class="model-row-cur">
+            <ic name="check" size="24" />
+            <text>当前</text>
+          </view>
+        </view>
+        <view wx:if="{{modelListMore}}" class="model-more">仅显示前 200 个匹配结果，请补充搜索关键词</view>
+      </view>
+    </scroll-view>
+    <view class="model-note">切换仅影响当前会话，从下一轮对话生效</view>
+  </view>
+
+  <view wx:if="{{showTheme}}" class="mask" bindtap="onThemeClose"></view>
+  <view wx:if="{{showTheme}}" class="theme-sheet">
+    <view class="sheet-handle"></view>
+    <view class="theme-sheet-head">
+      <view class="theme-sheet-title">主题外观</view>
+      <view class="tiny muted">即点即换</view>
+    </view>
+    <view class="theme-grid">
+      <view
+        wx:for="{{themeOptions}}"
+        wx:key="id"
+        class="theme-card {{item.id === theme ? 'theme-card-on' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onThemePick"
+      >
+        <view class="swatch" style="background: {{item.swatch}}">
+          <view class="swatch-dot" style="background: {{item.accent}}"></view>
+        </view>
+        <view class="theme-name">{{item.name}}</view>
+        <view class="theme-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{enhanceOpen}}" class="mask" bindtap="onEnhanceClose"></view>
+  <view wx:if="{{enhanceOpen}}" class="sheet-panel enhance-sheet" catchtouchmove="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">增强提示词</view>
+      <view class="sheet-close" bindtap="onEnhanceClose">
+        <ic name="close" size="30" />
+      </view>
+    </view>
+
+    <scroll-view scroll-y class="enhance-scroll">
+      <view class="enhance-intro">把输入框里的一句话改写成结构化需求。点按魔棒按钮立即增强，长按可回到这里修改配置。</view>
+      <view class="enhance-state {{enhanceReady ? 'ok' : 'warn'}}">
+        {{enhanceReady ? '已配置模型：' + enhanceModel : '尚未配置大模型，填写下方接口与模型后即可使用'}}
+      </view>
+
+      <view class="field">
+        <view class="field-label">接口地址</view>
+        <input
+          class="input enhance-input"
+          value="{{enhanceBaseUrl}}"
+          data-field="enhanceBaseUrl"
+          bindinput="onEnhanceField"
+          cursor-spacing="80"
+          placeholder="https://api.deepseek.com/v1"
+          placeholder-class="ph"
+        />
+        <view class="tiny muted enhance-hint">填到 /v1 即可，也可直接填完整的 /chat/completions 地址；需在小程序后台配置 request 合法域名</view>
+      </view>
+
+      <view class="field">
+        <view class="field-label">API Key</view>
+        <input
+          class="input enhance-input"
+          value="{{enhanceKey}}"
+          data-field="enhanceKey"
+          bindinput="onEnhanceField"
+          password="{{true}}"
+          cursor-spacing="80"
+          placeholder="留空表示无需鉴权"
+          placeholder-class="ph"
+        />
+        <view class="tiny muted enhance-hint">仅保存在本机，用于直连该接口，不会上传到 Hermes 站点</view>
+      </view>
+
+      <view class="field">
+        <view class="field-label">模型</view>
+        <input
+          class="input enhance-input"
+          value="{{enhanceModel}}"
+          data-field="enhanceModel"
+          bindinput="onEnhanceField"
+          cursor-spacing="80"
+          placeholder="deepseek-chat"
+          placeholder-class="ph"
+        />
+      </view>
+
+      <view class="field">
+        <view class="field-label">思考强度</view>
+        <view class="enhance-levels">
+          <view
+            wx:for="{{enhanceReasoningOptions}}"
+            wx:key="label"
+            class="enhance-level {{item.id === enhanceReasoning ? 'on' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="onEnhanceReasoningPick"
+            hover-class="tap-hover"
+          >{{item.label}}</view>
+        </view>
+        <view class="tiny muted enhance-hint">以 reasoning_effort 参数下发；模型不支持时可能被忽略，若报错改回「默认」</view>
+      </view>
+
+      <view class="enhance-test-row">
+        <view class="enhance-test {{enhanceTesting ? 'busy' : ''}}" bindtap="onEnhanceTest" hover-class="tap-hover">
+          {{enhanceTesting ? '测试中…' : '测试连接'}}
+        </view>
+        <text wx:if="{{enhanceTestMsg}}" class="enhance-test-msg {{enhanceTestOk ? 'ok' : 'bad'}}">{{enhanceTestMsg}}</text>
+      </view>
+
+      <view class="field">
+        <view class="field-label enhance-label-row">
+          <text>系统提示词</text>
+          <text class="enhance-reset" bindtap="onEnhanceResetPrompt">恢复默认</text>
+        </view>
+        <textarea
+          class="textarea enhance-prompt"
+          value="{{enhancePrompt}}"
+          data-field="enhancePrompt"
+          bindinput="onEnhanceField"
+          maxlength="-1"
+          cursor-spacing="120"
+          placeholder="留空则使用预置提示词"
+          placeholder-class="ph"
+        />
+      </view>
+    </scroll-view>
+
+    <view class="sheet-actions">
+      <view class="btn btn-ghost" bindtap="onEnhanceClose">取消</view>
+      <view class="btn btn-primary" bindtap="onEnhanceSave">保存</view>
+    </view>
+  </view>
+
+  <filesheet
+    id="filesheet"
+    show="{{fsShow}}"
+    endpoint="{{endpoint}}"
+    root-path="{{fsRoot}}"
+    focus-path="{{fsFocus}}"
+    profile="{{profile}}"
+    mode="browse"
+    title="工作目录"
+    bindclose="onFsClose"
+  />
+</view>

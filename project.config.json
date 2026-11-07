@@ -1,0 +1,42 @@
+{
+  "setting": {
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "uglifyFileName": false,
+    "enhance": true,
+    "packNpmRelationList": [],
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "useCompilerPlugins": false
+  },
+  "compileType": "miniprogram",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "file",
+        "value": "DeepSeekPic.jpeg"
+      },
+      {
+        "type": "file",
+        "value": "hermesapi.txt"
+      },
+      {
+        "type": "file",
+        "value": "GVzvLlOOj0.txt"
+      },
+      {
+        "type": "suffix",
+        "value": ".log"
+      }
+    ],
+    "include": []
+  },
+  "appid": "wxYOUR_APPID_HERE",
+  "editorSetting": {},
+  "projectname": "hermesbot"
+}

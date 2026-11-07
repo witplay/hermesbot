@@ -1,0 +1,34 @@
+<view class="app launch" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+    <view class="grid"></view>
+  </view>
+
+  <view class="launch-body">
+    <view class="launch-orb">
+      <view class="ring ring-a"></view>
+      <view class="ring ring-b"></view>
+      <view class="launch-avatar">
+        <image class="launch-avatar-img" src="/images/avatar.jpeg" mode="aspectFill" />
+      </view>
+    </view>
+
+    <view class="launch-brand">HERMES</view>
+    <view class="launch-sub">REMOTE INTELLIGENCE</view>
+
+    <view class="launch-status">
+      <view class="dot {{error ? 'dot-err' : 'dot-ok'}} dot-pulse"></view>
+      <text class="launch-status-text">{{statusText}}</text>
+    </view>
+    <view wx:if="{{error}}" class="launch-error">{{error}}</view>
+  </view>
+
+  <view class="launch-foot">
+    <view class="launch-site" bindtap="onPickSite">
+      <ic name="menu" size="26" />
+      <text>选择站点</text>
+    </view>
+    <view class="launch-ver tiny">移动端 Agent · {{themeName || '极光'}}</view>
+  </view>
+</view>

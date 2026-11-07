@@ -1,0 +1,145 @@
+<view class="app" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+  </view>
+
+  <view class="screen page cron-page">
+    <view wx:if="{{loading}}" class="cron-loading">
+      <view class="cron-spinner"></view>
+      <text>正在加载任务…</text>
+    </view>
+
+    <block wx:elif="{{error}}">
+      <view class="cron-error-card">
+        <view class="cron-error-ico"><ic name="info" size="40" /></view>
+        <view class="cron-error-title">无法打开定时任务</view>
+        <view class="cron-error-sub">{{error}}</view>
+        <view class="btn btn-ghost cron-error-btn" bindtap="onRetry">重新加载</view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="cron-status-card">
+        <view class="grow cron-status-copy">
+          <view class="cron-status-name ellipsis">{{name || '未命名任务'}}</view>
+          <view class="cron-status-sched ellipsis">{{scheduleText || '未设置执行时间'}}{{nextText ? ' · 下次 ' + nextText : ''}}</view>
+        </view>
+        <view class="cron-switch {{enabled ? 'on' : ''}} {{busy ? 'busy' : ''}}" bindtap="onToggleEnabled">
+          <view class="cron-knob"></view>
+        </view>
+      </view>
+
+      <view class="card cron-card">
+        <view class="cron-card-title">基本信息</view>
+
+        <view class="field">
+          <view class="field-label">标题</view>
+          <input
+            class="input"
+            value="{{name}}"
+            data-field="name"
+            bindinput="onField"
+            placeholder="例如：每日早报"
+            placeholder-class="ph"
+            maxlength="60"
+          />
+        </view>
+
+        <view class="field cron-field-last">
+          <view class="field-label">描述</view>
+          <textarea
+            class="textarea cron-textarea"
+            value="{{prompt}}"
+            data-field="prompt"
+            bindinput="onField"
+            placeholder="任务要做的事，例如：总结昨天的科技新闻并发送到飞书"
+            placeholder-class="ph"
+            maxlength="-1"
+            auto-height
+          />
+        </view>
+      </view>
+
+      <view class="card cron-card">
+        <view class="cron-card-title">执行时间</view>
+
+        <view class="seg cron-mode">
+          <view
+            wx:for="{{modes}}"
+            wx:key="id"
+            class="seg-item {{mode === item.id ? 'seg-on' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="onMode"
+          >{{item.label}}</view>
+        </view>
+
+        <view wx:if="{{mode === 'daily' || mode === 'weekly'}}" class="cron-row">
+          <text class="cron-row-label">时间</text>
+          <picker mode="time" value="{{time}}" bindchange="onTime" class="cron-picker">
+            <view class="cron-picker-value">{{time}}</view>
+          </picker>
+        </view>
+
+        <view wx:if="{{mode === 'weekly'}}" class="cron-row cron-row-days">
+          <text class="cron-row-label">星期</text>
+          <view class="cron-days">
+            <view
+              wx:for="{{weekdays}}"
+              wx:key="id"
+              class="cron-day {{weekday === item.id ? 'on' : ''}}"
+              data-id="{{item.id}}"
+              bindtap="onWeekday"
+            >{{item.label}}</view>
+          </view>
+        </view>
+
+        <view wx:if="{{mode === 'hourly'}}" class="cron-row">
+          <text class="cron-row-label">分钟</text>
+          <picker mode="selector" range="{{minuteLabels}}" value="{{minuteIndex}}" bindchange="onMinute" class="cron-picker">
+            <view class="cron-picker-value">第 {{minute}} 分钟</view>
+          </picker>
+        </view>
+
+        <view wx:if="{{mode === 'interval'}}" class="cron-row">
+          <text class="cron-row-label">间隔</text>
+          <view class="cron-interval">
+            <input class="input cron-num" type="number" value="{{intervalValue}}" bindinput="onIntervalValue" />
+            <view
+              wx:for="{{units}}"
+              wx:key="id"
+              class="cron-unit {{intervalUnit === item.id ? 'on' : ''}}"
+              data-id="{{item.id}}"
+              bindtap="onIntervalUnit"
+            >{{item.label}}</view>
+          </view>
+        </view>
+
+        <view wx:if="{{mode === 'custom'}}" class="cron-custom">
+          <view class="field-label">表达式</view>
+          <input
+            class="input mono"
+            value="{{cronExpr}}"
+            bindinput="onCronExpr"
+            placeholder="0 9 * * *"
+            placeholder-class="ph"
+          />
+          <view class="tiny muted cron-hint">支持 5 段 Cron、every 2h，或一次性时间 2026-05-01T09:00:00</view>
+        </view>
+
+        <view class="cron-preview">
+          <ic name="clock" size="22" />
+          <text class="cron-preview-text">{{scheduleText || '未设置执行时间'}}</text>
+        </view>
+      </view>
+
+      <view class="btn btn-primary btn-block cron-save {{saving ? 'disabled' : ''}}" bindtap="onSave">
+        {{saving ? '保存中…' : '保存修改'}}
+      </view>
+
+      <view wx:if="{{lastText}}" class="cron-foot">
+        上次执行 {{lastText}}{{statusText ? ' · ' + statusText : ''}}
+      </view>
+    </block>
+  </view>
+</view>

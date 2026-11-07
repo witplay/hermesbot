@@ -1,0 +1,611 @@
+.ic-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.ic {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  flex: none;
+}
+
+.ic .a,
+.ic .b,
+.ic .c {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+/* menu */
+.ic-menu .a,
+.ic-menu .b,
+.ic-menu .c {
+  left: calc(9rpx * var(--ic-scale, 1));
+  width: calc(18rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-menu .a { top: calc(9.6rpx * var(--ic-scale, 1)); }
+.ic-menu .b { top: calc(16.7rpx * var(--ic-scale, 1)); }
+.ic-menu .c { top: calc(23.8rpx * var(--ic-scale, 1)); }
+
+/* back chevron */
+.ic-back .a {
+  left: calc(16.6rpx * var(--ic-scale, 1));
+  top: calc(13.3rpx * var(--ic-scale, 1));
+  width: calc(9.4rpx * var(--ic-scale, 1));
+  height: calc(9.4rpx * var(--ic-scale, 1));
+  border-left: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom-left-radius: calc(1.7rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+
+/* plus */
+.ic-plus .a {
+  left: calc(8rpx * var(--ic-scale, 1));
+  top: calc(16.7rpx * var(--ic-scale, 1));
+  width: calc(20rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-plus .b {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(8rpx * var(--ic-scale, 1));
+  width: calc(2.6rpx * var(--ic-scale, 1));
+  height: calc(20rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+
+/* arrow up */
+.ic-arrow-up .a,
+.ic-send .a {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(11rpx * var(--ic-scale, 1));
+  width: calc(2.6rpx * var(--ic-scale, 1));
+  height: calc(17rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-arrow-up .b,
+.ic-send .b {
+  left: calc(12.5rpx * var(--ic-scale, 1));
+  top: calc(10rpx * var(--ic-scale, 1));
+  width: calc(11rpx * var(--ic-scale, 1));
+  height: calc(11rpx * var(--ic-scale, 1));
+  border-top: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-left: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-top-left-radius: calc(1.8rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+
+/* stop */
+.ic-stop .a {
+  left: calc(10.5rpx * var(--ic-scale, 1));
+  top: calc(10.5rpx * var(--ic-scale, 1));
+  width: calc(15rpx * var(--ic-scale, 1));
+  height: calc(15rpx * var(--ic-scale, 1));
+  border-radius: calc(4.6rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+
+/* mic */
+.ic-mic .a {
+  left: calc(13.8rpx * var(--ic-scale, 1));
+  top: calc(3.8rpx * var(--ic-scale, 1));
+  width: calc(8.4rpx * var(--ic-scale, 1));
+  height: calc(14.6rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: calc(4.2rpx * var(--ic-scale, 1));
+}
+.ic-mic .b {
+  left: calc(9.4rpx * var(--ic-scale, 1));
+  top: calc(12.8rpx * var(--ic-scale, 1));
+  width: calc(17.2rpx * var(--ic-scale, 1));
+  height: calc(10.6rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-top: none;
+  border-radius: 0 0 calc(8.6rpx * var(--ic-scale, 1)) calc(8.6rpx * var(--ic-scale, 1));
+}
+.ic-mic .c {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(21rpx * var(--ic-scale, 1));
+  width: calc(2.6rpx * var(--ic-scale, 1));
+  height: calc(7rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-mic .c::after {
+  content: '';
+  position: absolute;
+  left: calc(-3.2rpx * var(--ic-scale, 1));
+  bottom: calc(-2.6rpx * var(--ic-scale, 1));
+  width: calc(9rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+
+/* folder */
+.ic-folder .a {
+  left: calc(4rpx * var(--ic-scale, 1));
+  top: calc(11rpx * var(--ic-scale, 1));
+  width: calc(28rpx * var(--ic-scale, 1));
+  height: calc(19rpx * var(--ic-scale, 1));
+  border-left: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: 0 0 calc(5rpx * var(--ic-scale, 1)) calc(5rpx * var(--ic-scale, 1));
+}
+.ic-folder .b {
+  left: calc(15.5rpx * var(--ic-scale, 1));
+  top: calc(11rpx * var(--ic-scale, 1));
+  width: calc(16.5rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-folder .c {
+  left: calc(4rpx * var(--ic-scale, 1));
+  top: calc(6.5rpx * var(--ic-scale, 1));
+  width: calc(12.5rpx * var(--ic-scale, 1));
+  height: calc(5rpx * var(--ic-scale, 1));
+  border-top: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-left: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: calc(3.2rpx * var(--ic-scale, 1)) calc(3.2rpx * var(--ic-scale, 1)) 0 0;
+}
+
+/* more */
+.ic-more .a,
+.ic-more .b,
+.ic-more .c {
+  top: calc(15.4rpx * var(--ic-scale, 1));
+  width: calc(5.2rpx * var(--ic-scale, 1));
+  height: calc(5.2rpx * var(--ic-scale, 1));
+  border-radius: 50%;
+  background: currentColor;
+}
+.ic-more .a { left: calc(7.4rpx * var(--ic-scale, 1)); }
+.ic-more .b { left: calc(15.4rpx * var(--ic-scale, 1)); }
+.ic-more .c { left: calc(23.4rpx * var(--ic-scale, 1)); }
+
+/* close */
+.ic-close .a,
+.ic-close .b {
+  left: calc(9.5rpx * var(--ic-scale, 1));
+  top: calc(16.7rpx * var(--ic-scale, 1));
+  width: calc(17rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-close .a { transform: rotate(45deg); }
+.ic-close .b { transform: rotate(-45deg); }
+
+/* copy */
+.ic-copy .a {
+  left: calc(7rpx * var(--ic-scale, 1));
+  top: calc(10.8rpx * var(--ic-scale, 1));
+  width: calc(16.5rpx * var(--ic-scale, 1));
+  height: calc(19rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: calc(4.5rpx * var(--ic-scale, 1));
+  opacity: 0.42;
+}
+.ic-copy .b {
+  left: calc(12.8rpx * var(--ic-scale, 1));
+  top: calc(5.8rpx * var(--ic-scale, 1));
+  width: calc(16.5rpx * var(--ic-scale, 1));
+  height: calc(19rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: calc(4.5rpx * var(--ic-scale, 1));
+}
+
+/* info */
+.ic-info .a {
+  left: calc(6.6rpx * var(--ic-scale, 1));
+  top: calc(6.6rpx * var(--ic-scale, 1));
+  width: calc(22.8rpx * var(--ic-scale, 1));
+  height: calc(22.8rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: 50%;
+}
+.ic-info .b {
+  left: calc(16.3rpx * var(--ic-scale, 1));
+  top: calc(10.6rpx * var(--ic-scale, 1));
+  width: calc(3.4rpx * var(--ic-scale, 1));
+  height: calc(3.4rpx * var(--ic-scale, 1));
+  border-radius: 50%;
+  background: currentColor;
+}
+.ic-info .c {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(16.4rpx * var(--ic-scale, 1));
+  width: calc(2.6rpx * var(--ic-scale, 1));
+  height: calc(8.4rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+
+/* theme (half moon) */
+.ic-theme .a {
+  left: calc(6.6rpx * var(--ic-scale, 1));
+  top: calc(6.6rpx * var(--ic-scale, 1));
+  width: calc(22.8rpx * var(--ic-scale, 1));
+  height: calc(22.8rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: 50%;
+}
+.ic-theme .b {
+  left: calc(18.3rpx * var(--ic-scale, 1));
+  top: calc(9.3rpx * var(--ic-scale, 1));
+  width: calc(8rpx * var(--ic-scale, 1));
+  height: calc(17.4rpx * var(--ic-scale, 1));
+  border-radius: 0 calc(8.7rpx * var(--ic-scale, 1)) calc(8.7rpx * var(--ic-scale, 1)) 0;
+  background: currentColor;
+}
+
+/* refresh / redo 为顺时针回环箭头；undo 整体水平镜像成逆时针 */
+.ic-undo {
+  transform: scaleX(-1);
+}
+.ic-refresh .a,
+.ic-undo .a,
+.ic-redo .a {
+  left: calc(6.5rpx * var(--ic-scale, 1));
+  top: calc(6.5rpx * var(--ic-scale, 1));
+  width: calc(23rpx * var(--ic-scale, 1));
+  height: calc(23rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  transform: rotate(-38deg);
+}
+.ic-refresh .b,
+.ic-undo .b,
+.ic-redo .b {
+  left: calc(20rpx * var(--ic-scale, 1));
+  top: calc(4.8rpx * var(--ic-scale, 1));
+  width: 0;
+  height: 0;
+  border-top: calc(4.2rpx * var(--ic-scale, 1)) solid transparent;
+  border-bottom: calc(4.2rpx * var(--ic-scale, 1)) solid transparent;
+  border-left: calc(7.4rpx * var(--ic-scale, 1)) solid currentColor;
+  transform: rotate(10deg);
+  transform-origin: 0 50%;
+}
+
+/* search */
+.ic-search .a {
+  left: calc(7rpx * var(--ic-scale, 1));
+  top: calc(7rpx * var(--ic-scale, 1));
+  width: calc(17rpx * var(--ic-scale, 1));
+  height: calc(17rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: 50%;
+}
+.ic-search .b {
+  left: calc(21.75rpx * var(--ic-scale, 1));
+  top: calc(24.7rpx * var(--ic-scale, 1));
+  width: calc(8.5rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+/* file */
+.ic-file .a {
+  left: calc(9rpx * var(--ic-scale, 1));
+  top: calc(4.5rpx * var(--ic-scale, 1));
+  width: calc(18rpx * var(--ic-scale, 1));
+  height: calc(27rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: calc(4rpx * var(--ic-scale, 1));
+}
+.ic-file .a::after {
+  content: '';
+  position: absolute;
+  left: calc(2.2rpx * var(--ic-scale, 1));
+  top: calc(18.5rpx * var(--ic-scale, 1));
+  width: calc(5.5rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+  opacity: 0.45;
+}
+.ic-file .b {
+  left: calc(20.2rpx * var(--ic-scale, 1));
+  top: calc(10rpx * var(--ic-scale, 1));
+  width: calc(7.2rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+  opacity: 0.55;
+  transform: rotate(-45deg);
+}
+.ic-file .c {
+  left: calc(13.5rpx * var(--ic-scale, 1));
+  top: calc(18.2rpx * var(--ic-scale, 1));
+  width: calc(9rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+  opacity: 0.7;
+}
+
+/* image */
+.ic-image .a {
+  left: calc(5rpx * var(--ic-scale, 1));
+  top: calc(8rpx * var(--ic-scale, 1));
+  width: calc(26rpx * var(--ic-scale, 1));
+  height: calc(20rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: calc(4.5rpx * var(--ic-scale, 1));
+}
+.ic-image .b {
+  left: calc(12.5rpx * var(--ic-scale, 1));
+  top: calc(13.2rpx * var(--ic-scale, 1));
+  width: calc(4.2rpx * var(--ic-scale, 1));
+  height: calc(4.2rpx * var(--ic-scale, 1));
+  border-radius: 50%;
+  background: currentColor;
+}
+.ic-image .c {
+  left: calc(13.5rpx * var(--ic-scale, 1));
+  top: calc(19rpx * var(--ic-scale, 1));
+  width: calc(9rpx * var(--ic-scale, 1));
+  height: calc(9rpx * var(--ic-scale, 1));
+  border-top: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-left: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-top-left-radius: calc(2rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+
+/* check */
+.ic-check .a {
+  left: calc(14.5rpx * var(--ic-scale, 1));
+  top: calc(9.5rpx * var(--ic-scale, 1));
+  width: calc(7rpx * var(--ic-scale, 1));
+  height: calc(17rpx * var(--ic-scale, 1));
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom-right-radius: calc(2.2rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+
+/* check inside a ring */
+.ic-check-circle .a {
+  left: calc(6.6rpx * var(--ic-scale, 1));
+  top: calc(6.6rpx * var(--ic-scale, 1));
+  width: calc(22.8rpx * var(--ic-scale, 1));
+  height: calc(22.8rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: 50%;
+}
+.ic-check-circle .b {
+  left: calc(15.4rpx * var(--ic-scale, 1));
+  top: calc(13rpx * var(--ic-scale, 1));
+  width: calc(5.2rpx * var(--ic-scale, 1));
+  height: calc(9.6rpx * var(--ic-scale, 1));
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom-right-radius: calc(1.6rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+
+/* chevrons */
+.ic-chevron-right .a,
+.ic-chevron-down .a,
+.ic-chevron-up .a {
+  width: calc(9.4rpx * var(--ic-scale, 1));
+  height: calc(9.4rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+.ic-chevron-right .a {
+  left: calc(10rpx * var(--ic-scale, 1));
+  top: calc(13.3rpx * var(--ic-scale, 1));
+  border-top: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-top-right-radius: calc(1.7rpx * var(--ic-scale, 1));
+}
+.ic-chevron-down .a {
+  left: calc(13.3rpx * var(--ic-scale, 1));
+  top: calc(10rpx * var(--ic-scale, 1));
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom-right-radius: calc(1.7rpx * var(--ic-scale, 1));
+}
+.ic-chevron-up .a {
+  left: calc(13.3rpx * var(--ic-scale, 1));
+  top: calc(16.6rpx * var(--ic-scale, 1));
+  border-top: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-left: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-top-left-radius: calc(1.7rpx * var(--ic-scale, 1));
+}
+
+/* queue (list of pending lines) */
+.ic-queue .a,
+.ic-queue .b,
+.ic-queue .c {
+  left: calc(7rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-queue .a {
+  top: calc(9.5rpx * var(--ic-scale, 1));
+  width: calc(22rpx * var(--ic-scale, 1));
+}
+.ic-queue .b {
+  top: calc(16.7rpx * var(--ic-scale, 1));
+  width: calc(22rpx * var(--ic-scale, 1));
+}
+.ic-queue .c {
+  top: calc(23.9rpx * var(--ic-scale, 1));
+  width: calc(13rpx * var(--ic-scale, 1));
+}
+
+/* insert (drop into the running turn) */
+.ic-insert .a {
+  left: calc(8rpx * var(--ic-scale, 1));
+  top: calc(27rpx * var(--ic-scale, 1));
+  width: calc(20rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-insert .b {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(5.5rpx * var(--ic-scale, 1));
+  width: calc(2.6rpx * var(--ic-scale, 1));
+  height: calc(14.5rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-insert .c {
+  left: calc(12.5rpx * var(--ic-scale, 1));
+  top: calc(10rpx * var(--ic-scale, 1));
+  width: calc(11rpx * var(--ic-scale, 1));
+  height: calc(11rpx * var(--ic-scale, 1));
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom-right-radius: calc(1.8rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}
+
+/* clock (scheduled tasks) */
+.ic-clock .a {
+  left: calc(5.5rpx * var(--ic-scale, 1));
+  top: calc(5.5rpx * var(--ic-scale, 1));
+  width: calc(25rpx * var(--ic-scale, 1));
+  height: calc(25rpx * var(--ic-scale, 1));
+  border: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-radius: 50%;
+}
+.ic-clock .b {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(9.5rpx * var(--ic-scale, 1));
+  width: calc(2.6rpx * var(--ic-scale, 1));
+  height: calc(8.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-clock .c {
+  left: calc(16.7rpx * var(--ic-scale, 1));
+  top: calc(15.7rpx * var(--ic-scale, 1));
+  width: calc(7.6rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+
+/* wand with sparkles (prompt enhance) */
+.ic-wand .a {
+  left: calc(7rpx * var(--ic-scale, 1));
+  top: calc(24rpx * var(--ic-scale, 1));
+  width: calc(20rpx * var(--ic-scale, 1));
+  height: calc(3rpx * var(--ic-scale, 1));
+  border-radius: calc(1.5rpx * var(--ic-scale, 1));
+  background: currentColor;
+  transform: rotate(-45deg);
+}
+.ic-wand .b {
+  left: calc(21rpx * var(--ic-scale, 1));
+  top: calc(4.6rpx * var(--ic-scale, 1));
+  width: calc(7.6rpx * var(--ic-scale, 1));
+  height: calc(7.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.2rpx * var(--ic-scale, 1));
+  background: currentColor;
+  transform: rotate(45deg);
+}
+.ic-wand .c {
+  left: calc(27.4rpx * var(--ic-scale, 1));
+  top: calc(14rpx * var(--ic-scale, 1));
+  width: calc(4.4rpx * var(--ic-scale, 1));
+  height: calc(4.4rpx * var(--ic-scale, 1));
+  border-radius: calc(0.8rpx * var(--ic-scale, 1));
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+/* expand：四角外扩，输入框全屏 */
+.ic-expand .a,
+.ic-expand .b {
+  width: calc(9rpx * var(--ic-scale, 1));
+  height: calc(9rpx * var(--ic-scale, 1));
+  border-style: solid;
+  border-color: currentColor;
+  border-width: 0;
+  border-radius: calc(2rpx * var(--ic-scale, 1));
+}
+.ic-expand .a {
+  left: calc(6rpx * var(--ic-scale, 1));
+  top: calc(6rpx * var(--ic-scale, 1));
+  border-left-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-top-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-top-left-radius: calc(2rpx * var(--ic-scale, 1));
+}
+.ic-expand .a::after {
+  content: '';
+  position: absolute;
+  left: calc(15rpx * var(--ic-scale, 1));
+  top: calc(-2.6rpx * var(--ic-scale, 1));
+  width: calc(9rpx * var(--ic-scale, 1));
+  height: calc(9rpx * var(--ic-scale, 1));
+  border-style: solid;
+  border-color: currentColor;
+  border-width: 0;
+  border-right-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-top-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-top-right-radius: calc(2rpx * var(--ic-scale, 1));
+}
+.ic-expand .b {
+  left: calc(6rpx * var(--ic-scale, 1));
+  bottom: calc(6rpx * var(--ic-scale, 1));
+  border-left-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-bottom-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-bottom-left-radius: calc(2rpx * var(--ic-scale, 1));
+}
+.ic-expand .b::after {
+  content: '';
+  position: absolute;
+  left: calc(15rpx * var(--ic-scale, 1));
+  bottom: calc(-2.6rpx * var(--ic-scale, 1));
+  width: calc(9rpx * var(--ic-scale, 1));
+  height: calc(9rpx * var(--ic-scale, 1));
+  border-style: solid;
+  border-color: currentColor;
+  border-width: 0;
+  border-right-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-bottom-width: calc(2.6rpx * var(--ic-scale, 1));
+  border-bottom-right-radius: calc(2rpx * var(--ic-scale, 1));
+}
+
+/* collapse：向下箭头 + 底线，表示还原到原始尺寸 */
+.ic-collapse .a {
+  left: calc(9rpx * var(--ic-scale, 1));
+  bottom: calc(7rpx * var(--ic-scale, 1));
+  width: calc(18rpx * var(--ic-scale, 1));
+  height: calc(2.6rpx * var(--ic-scale, 1));
+  border-radius: calc(1.3rpx * var(--ic-scale, 1));
+  background: currentColor;
+}
+.ic-collapse .b {
+  left: calc(13rpx * var(--ic-scale, 1));
+  top: calc(11rpx * var(--ic-scale, 1));
+  width: calc(10rpx * var(--ic-scale, 1));
+  height: calc(10rpx * var(--ic-scale, 1));
+  border-right: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom: calc(2.6rpx * var(--ic-scale, 1)) solid currentColor;
+  border-bottom-right-radius: calc(1.7rpx * var(--ic-scale, 1));
+  transform: rotate(45deg);
+}

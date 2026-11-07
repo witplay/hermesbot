@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "ic": "/components/ic/ic"
+  }
+}

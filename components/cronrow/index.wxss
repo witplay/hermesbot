@@ -1,0 +1,119 @@
+.cmsg {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 12rpx;
+  padding: 20rpx 18rpx 18rpx 22rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(158deg, var(--glass, rgba(255, 255, 255, 0.055)), var(--glass2, rgba(255, 255, 255, 0.015)));
+  border: 1rpx solid var(--border, rgba(110, 190, 255, 0.16));
+  box-shadow: var(--shadow-soft, 0 10rpx 30rpx rgba(0, 0, 0, 0.26));
+}
+
+.cmsg:active {
+  background: var(--chip-bg, rgba(255, 255, 255, 0.07));
+}
+
+.cmsg-rail {
+  position: absolute;
+  left: 0;
+  top: 22rpx;
+  bottom: 22rpx;
+  width: 4rpx;
+  border-radius: 0 4rpx 4rpx 0;
+  background: var(--ok, #34d399);
+  opacity: 0.72;
+}
+
+.cmsg-rail.fail {
+  background: var(--danger, #fb7185);
+}
+
+.cmsg-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cmsg-top {
+  display: flex;
+  align-items: baseline;
+}
+
+.cmsg-title {
+  flex: 1;
+  min-width: 0;
+  margin-right: 12rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--text, #e8f2ff);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmsg-date {
+  flex: none;
+  font-size: 19rpx;
+  color: var(--mute, #64748b);
+}
+
+.cmsg-prev {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: var(--dim, #93a7c2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmsg-meta {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.cmsg-status {
+  flex: none;
+  padding: 2rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 18rpx;
+  letter-spacing: 1rpx;
+  color: var(--ok, #34d399);
+  background: var(--ok-soft, rgba(52, 211, 153, 0.14));
+}
+
+.cmsg-status.fail {
+  color: var(--danger, #fb7185);
+  background: var(--danger-soft, rgba(251, 113, 133, 0.14));
+}
+
+.cmsg-ws {
+  flex: 1;
+  min-width: 0;
+  margin-left: 12rpx;
+  font-size: 19rpx;
+  color: var(--mute, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmsg-open {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50rpx;
+  margin-left: auto;
+  padding: 0 16rpx;
+  border-radius: 25rpx;
+  background: var(--chip-bg, rgba(255, 255, 255, 0.07));
+  border: 1rpx solid var(--border, rgba(110, 190, 255, 0.16));
+  color: var(--dim, #93a7c2);
+  font-size: 20rpx;
+}
+
+.cmsg-open-txt {
+  margin-right: 2rpx;
+}

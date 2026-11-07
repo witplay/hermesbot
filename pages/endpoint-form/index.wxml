@@ -1,0 +1,75 @@
+<view class="app" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+    <view class="grid"></view>
+  </view>
+
+  <view class="screen page form-page">
+    <view class="form-hero">
+      <view class="form-orb">
+        <image class="form-orb-img" src="/images/avatar.jpeg" mode="aspectFill" />
+      </view>
+      <view class="form-title">{{isNew ? '连接站点' : '编辑站点'}}</view>
+      <view class="form-desc">填写 Hermes 实例地址与账号，令牌自动续期</view>
+    </view>
+
+    <view class="card form-card">
+      <view class="field">
+        <view class="field-label">名称</view>
+        <input class="input" value="{{label}}" data-field="label" bindinput="onField" placeholder="例如：公司 Hermes" placeholder-class="ph" />
+      </view>
+
+      <view class="field">
+        <view class="field-label">服务地址</view>
+        <input class="input" value="{{baseUrl}}" data-field="baseUrl" bindinput="onField" placeholder="https://hermes.example.com" placeholder-class="ph" />
+        <view class="tiny muted hint">支持路径前缀，如 https://example.com/hermes；非标准端口请连同端口一起填写（如 :8080）</view>
+      </view>
+
+      <view class="form-divider row">
+        <view class="divider-line"></view>
+        <view class="divider-text">登录凭据</view>
+        <view class="divider-line"></view>
+      </view>
+
+      <view class="field">
+        <view class="field-label">用户名</view>
+        <input class="input" value="{{username}}" data-field="username" bindinput="onField" placeholder="Hermes 登录用户名" placeholder-class="ph" />
+      </view>
+
+      <view class="field">
+        <view class="field-label">密码</view>
+        <input class="input" value="{{password}}" data-field="password" bindinput="onField" password="{{true}}" placeholder="{{isNew ? '登录密码' : '留空则沿用已有登录状态'}}" placeholder-class="ph" />
+        <view class="tiny muted hint">密码仅用于换取令牌，不会保存在本地</view>
+      </view>
+
+      <view class="adv-toggle row between" bindtap="onToggleAdvanced">
+        <view class="adv-title">使用访问令牌登录（高级）</view>
+        <view class="adv-caret"><ic name="{{advanced ? 'chevron-up' : 'chevron-down'}}" size="24" /></view>
+      </view>
+
+      <view wx:if="{{advanced}}" class="adv-panel">
+        <view class="tiny muted hint">适用于服务端无法回传 Cookie 的情况。令牌可在 Hermes 桌面端或浏览器会话中获取。</view>
+        <textarea
+          class="textarea token-input"
+          value="{{accessToken}}"
+          data-field="accessToken"
+          bindinput="onField"
+          placeholder="粘贴 access_token"
+          placeholder-class="ph"
+          maxlength="-1"
+        />
+        <view class="btn btn-ghost btn-block token-btn" bindtap="onTokenLogin">验证令牌并登录</view>
+      </view>
+    </view>
+
+    <view class="btn btn-primary btn-block save {{loading ? 'disabled' : ''}}" bindtap="onSave">
+      {{loading ? loadingText : (isNew ? '保存并登录' : '保存')}}
+    </view>
+
+    <view class="tip">
+      登录方式与 Hermes 桌面端一致：账号密码换取访问令牌，再用令牌连接 REST 与 WebSocket。
+      令牌过期会自动续期；小程序后台需配置 request / socket 合法域名。
+    </view>
+  </view>
+</view>

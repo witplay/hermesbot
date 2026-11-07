@@ -1,0 +1,537 @@
+<view class="app sessions-app" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+  </view>
+
+  <view class="sessions-shell">
+    <view class="sessions-head">
+      <view style="height:{{statusBarHeight}}px;"></view>
+      <view class="nav-row" style="height:{{navRowHeight}}px;padding-right:{{capsulePad}}px;">
+        <view class="brand" bindtap="onSiteTap">
+          <view class="brand-avatar">
+            <image class="brand-avatar-img" src="/images/avatar.jpeg" mode="aspectFill" />
+          </view>
+          <view class="brand-copy">
+            <view class="brand-title">Hermes</view>
+            <view class="brand-sub ellipsis">{{endpointLabel}}</view>
+          </view>
+          <view class="brand-caret"><ic name="chevron-down" size="22" /></view>
+        </view>
+        <view class="head-actions">
+          <view class="nav-icon sm" bindtap="onThemeOpen"><ic name="theme" size="30" /></view>
+        </view>
+      </view>
+
+      <view class="search-row">
+        <view class="search-box">
+          <ic name="search" size="28" />
+          <input
+            class="search-input"
+            value="{{query}}"
+            placeholder="{{tab === 'cron' ? '搜索定时任务' : '搜索会话、工作空间'}}"
+            placeholder-class="ph"
+            confirm-type="search"
+            bindinput="onSearch"
+          />
+          <view wx:if="{{query}}" class="search-clear" bindtap="onSearchClear">
+            <ic name="close" size="22" />
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{profiles.length > 1}}" class="profile-row head-profiles">
+        <view class="profile-icon"><ic name="info" size="24" /></view>
+        <scroll-view scroll-x class="profile-scroll" enhanced show-scrollbar="{{false}}">
+          <view
+            wx:for="{{profiles}}"
+            wx:key="*this"
+            class="profile-chip {{item === profile ? 'on' : ''}}"
+            data-name="{{item}}"
+            bindtap="onProfile"
+          >{{item}}</view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <scroll-view
+      scroll-y
+      class="sessions-scroll"
+      enhanced
+      show-scrollbar="{{false}}"
+      refresher-enabled
+      refresher-triggered="{{pullRefresh}}"
+      refresher-background="transparent"
+      bindrefresherrefresh="onRefresh"
+    >
+      <view class="sessions-body">
+        <view class="chan-tabs body-tabs">
+          <view
+            wx:for="{{tabs}}"
+            wx:key="id"
+            class="chan-tab {{tab === item.id ? 'on' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="onTab"
+          >
+            <text class="chan-label">{{item.label}}</text>
+            <text class="chan-count">{{item.count}}</text>
+          </view>
+        </view>
+
+        <!-- 定时任务 ---------------------------------------------------->
+        <block wx:if="{{tab === 'cron'}}">
+          <view class="cron-hero">
+            <view class="cron-hero-ico"><ic name="clock" size="30" /></view>
+            <view class="grow cron-hero-copy">
+              <view class="cron-hero-title">定时任务</view>
+              <view class="cron-hero-sub">{{cronJobs.length}} 个任务</view>
+            </view>
+            <view class="cron-hero-refresh {{cronLoading ? 'spin' : ''}}" bindtap="onCronRetry">
+              <ic name="refresh" size="24" />
+            </view>
+          </view>
+
+          <view class="sect-head">
+            <view class="sect-title"><view class="sect-bar"></view><text>最近消息</text></view>
+            <text class="sect-hint">{{cronRecent.length ? '点按查看会话' : '按时间排序'}}</text>
+          </view>
+
+          <view wx:if="{{cronRecent.length}}" class="cron-msg-list">
+            <cronrow
+              wx:for="{{cronRecent}}"
+              wx:key="id"
+              item="{{item}}"
+              bindopen="onCronRecent"
+            />
+          </view>
+          <view wx:else class="cron-empty">最近还没有定时任务消息</view>
+
+          <view class="sect-head ws-sect-head">
+            <view class="sect-title"><view class="sect-bar"></view><text>任务列表</text></view>
+            <text class="sect-hint">{{cronList.length}} 个 · 点按编辑</text>
+          </view>
+
+          <block wx:if="{{cronLoading && !cronJobs.length}}">
+            <view class="sk sk-wsrow"></view>
+            <view class="sk sk-wsrow"></view>
+          </block>
+
+          <view wx:elif="{{cronError && !cronJobs.length}}" class="state-card">
+            <view class="state-ico err"><ic name="info" size="40" /></view>
+            <view class="state-title">定时任务加载失败</view>
+            <view class="state-sub">{{cronError}}</view>
+            <view class="btn btn-ghost state-btn" bindtap="onCronRetry">重新加载</view>
+          </view>
+
+          <view wx:elif="{{!cronJobs.length}}" class="state-card">
+            <view class="state-orb"><ic name="clock" size="48" /></view>
+            <view class="state-title">还没有定时任务</view>
+            <view class="state-sub">{{cronUnavailable ? '当前服务端未启用定时任务模块' : '在 Hermes 中创建的定时任务会显示在这里'}}</view>
+          </view>
+
+          <view wx:elif="{{!cronList.length}}" class="state-card">
+            <view class="state-ico"><ic name="search" size="38" /></view>
+            <view class="state-title">没有匹配的定时任务</view>
+            <view class="state-sub">换个关键词试试</view>
+            <view class="btn btn-ghost state-btn" bindtap="onSearchClear">清除搜索</view>
+          </view>
+
+          <block wx:else>
+            <view
+              wx:for="{{cronList}}"
+              wx:key="id"
+              class="cron-card"
+              data-id="{{item.id}}"
+              bindtap="onCronDetail"
+            >
+              <view class="cron-card-top">
+                <view class="cron-state {{item.enabled ? 'on' : 'off'}}"></view>
+                <view class="grow cron-card-copy">
+                  <view class="cron-name ellipsis">{{item.name}}</view>
+                  <view class="cron-sched">
+                    <ic name="clock" size="20" />
+                    <text class="cron-sched-text ellipsis">{{item.scheduleText}}</text>
+                  </view>
+                </view>
+                <view
+                  class="cron-switch {{item.enabled ? 'on' : ''}} {{cronBusyId === item.id ? 'busy' : ''}}"
+                  data-id="{{item.id}}"
+                  catchtap="onCronToggle"
+                >
+                  <view class="cron-knob"></view>
+                </view>
+              </view>
+
+              <view wx:if="{{item.prompt}}" class="cron-prompt ellipsis">{{item.prompt}}</view>
+
+              <view class="cron-card-foot">
+                <text class="cron-status {{item.tone}}">{{item.statusText}}</text>
+                <text wx:if="{{item.nextText}}" class="cron-next">下次 {{item.nextText}}</text>
+                <view class="cron-history" data-id="{{item.id}}" catchtap="onCronHistory">
+                  <ic name="queue" size="18" />
+                  <text>历史</text>
+                </view>
+                <view class="cron-go"><ic name="chevron-right" size="20" /></view>
+              </view>
+            </view>
+            <view wx:if="{{cronError}}" class="inline-error">{{cronError}}</view>
+          </block>
+        </block>
+
+        <!-- 会话 -------------------------------------------------------->
+        <block wx:else>
+          <view wx:if="{{hasAny}}" class="list-summary">
+            <text class="sum-num">{{shownCount}}</text>
+            <text class="sum-label">个会话 · {{profileLabel}}</text>
+            <text class="sum-hint">长按管理</text>
+          </view>
+
+          <block wx:if="{{loading && !groups.length}}">
+            <view class="sk sk-head"></view>
+            <view class="sk sk-card"></view>
+            <view class="sk sk-head short"></view>
+            <view class="sk sk-wsrow"></view>
+            <view class="sk sk-wsrow"></view>
+            <view class="sk sk-wsrow"></view>
+          </block>
+
+          <view wx:elif="{{error && !groups.length}}" class="state-card">
+            <view class="state-ico err"><ic name="info" size="40" /></view>
+            <view class="state-title">加载失败</view>
+            <view class="state-sub">{{error}}</view>
+            <view class="btn btn-primary state-btn" bindtap="onRefresh">重新加载</view>
+          </view>
+
+          <view wx:elif="{{!hasAny}}" class="state-card">
+            <view class="state-orb"><ic name="plus" size="48" /></view>
+            <view class="state-title">还没有会话</view>
+            <view class="state-sub">选择工作空间，开始第一段对话</view>
+            <view class="btn btn-primary state-btn" bindtap="onNew">新建会话</view>
+          </view>
+
+          <view wx:elif="{{!groups.length}}" class="state-card">
+            <view class="state-ico"><ic name="search" size="38" /></view>
+            <view class="state-title">没有匹配的会话</view>
+            <view class="state-sub">换个关键词，或查看其它类型</view>
+            <view class="btn btn-ghost state-btn" bindtap="onResetFilters">重置筛选</view>
+          </view>
+
+          <block wx:if="{{groups.length}}">
+            <block wx:if="{{recentList.length}}">
+              <view class="sect-head">
+                <view class="sect-title"><view class="sect-bar"></view><text>最近会话</text></view>
+                <text class="sect-hint">{{recentList.length}} 条 · 按活跃排序</text>
+              </view>
+
+              <view class="recent-card">
+                <view
+                  wx:for="{{recentList}}"
+                  wx:for-item="row"
+                  wx:key="id"
+                  class="sess-row recent-row"
+                  data-id="{{row.id}}"
+                  data-cwd="{{row.cwd}}"
+                  data-title="{{row.title}}"
+                  bindtap="onOpen"
+                  bindlongpress="onLongPress"
+                >
+                  <view class="sess-rail rail-{{row.channel}}"></view>
+                  <view class="sess-main">
+                    <view class="recent-top">
+                      <view wx:if="{{row.active}}" class="live-dot recent-live"></view>
+                      <text class="sess-title ellipsis">{{row.title || row.channelLabel}}</text>
+                      <text wx:if="{{row.draft}}" class="recent-draft">草稿</text>
+                      <text class="sess-time">{{row.timeText}}</text>
+                    </view>
+                    <view class="recent-sub">
+                      <view class="recent-ws">
+                        <ic class="recent-ws-ico" name="folder" size="20" />
+                        <text class="recent-ws-name ellipsis">{{row.wsName}}</text>
+                      </view>
+                      <text class="recent-prev ellipsis">{{row.preview || row.channelLabel}}</text>
+                    </view>
+                  </view>
+                  <view class="sess-chev"><ic name="chevron-right" size="22" /></view>
+                </view>
+              </view>
+            </block>
+
+            <view class="sect-head ws-sect-head">
+              <view class="sect-title"><view class="sect-bar"></view><text>工作区</text></view>
+              <text class="sect-hint">{{groups.length}} 个文件夹 · {{query ? '匹配结果' : '点击展开'}}</text>
+            </view>
+
+            <view wx:for="{{groups}}" wx:for-item="group" wx:key="key" class="ws-group">
+              <view
+                class="ws-head {{group.expanded ? 'on' : ''}}"
+                data-key="{{group.key}}"
+                bindtap="onToggleGroup"
+              >
+                <view class="ws-ico"><ic name="folder" size="28" /></view>
+                <view class="grow ws-copy">
+                  <view class="ws-name-row">
+                    <text class="ws-name ellipsis">{{group.name}}</text>
+                    <text class="ws-count">{{group.count}} 个</text>
+                  </view>
+                  <view class="ws-path ellipsis">{{group.displayPath}}</view>
+                </view>
+                <view class="ws-new" data-cwd="{{group.cwd}}" catchtap="onGroupNew">
+                  <ic name="plus" size="24" />
+                </view>
+                <view class="ws-chev {{group.expanded ? 'open' : ''}}">
+                  <ic name="chevron-down" size="22" />
+                </view>
+              </view>
+
+              <view wx:if="{{group.expanded}}" class="ws-card">
+                <view
+                  wx:for="{{group.items}}"
+                  wx:for-item="row"
+                  wx:key="id"
+                  class="sess-row"
+                  data-id="{{row.id}}"
+                  data-cwd="{{row.cwd}}"
+                  data-title="{{row.title}}"
+                  bindtap="onOpen"
+                  bindlongpress="onLongPress"
+                >
+                  <view class="sess-rail rail-{{row.channel}}"></view>
+                  <view class="sess-main">
+                    <view class="sess-top">
+                      <text class="sess-title ellipsis">{{row.title || row.channelLabel}}</text>
+                      <text class="sess-time">{{row.timeText}}</text>
+                    </view>
+                    <view class="sess-preview ellipsis">{{row.preview || row.channelLabel}}</view>
+                    <view class="sess-meta">
+                      <text class="badge {{row.channelBadge}}">{{row.channelLabel}}</text>
+                      <text class="meta-text">{{row.messageCount}} 条</text>
+                      <text wx:if="{{row.model}}" class="meta-text ellipsis meta-model">{{row.model}}</text>
+                      <view wx:if="{{row.active}}" class="live-badge">
+                        <view class="live-dot"></view>进行中
+                      </view>
+                      <view wx:if="{{row.draft}}" class="draft-badge">草稿</view>
+                    </view>
+                  </view>
+                  <view class="sess-chev"><ic name="chevron-right" size="22" /></view>
+                </view>
+              </view>
+            </view>
+
+            <view wx:if="{{error}}" class="inline-error">{{error}}</view>
+            <view class="list-foot">已显示 {{shownCount}} / {{allCount}} 个会话</view>
+          </block>
+        </block>
+      </view>
+    </scroll-view>
+
+    <view wx:if="{{hasAny && tab !== 'cron'}}" class="fab" bindtap="onNew">
+      <ic name="plus" size="50" />
+      <view class="fab-ring"></view>
+    </view>
+  </view>
+
+  <!-- workspace picker ------------------------------------------------>
+  <view wx:if="{{showPicker}}" class="mask" bindtap="onPickerClose"></view>
+  <view wx:if="{{showPicker}}" class="sheet-panel ws-picker">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="grow">
+        <view class="sheet-title">新建会话</view>
+        <view class="tiny muted">选择模型、推理强度与工作空间</view>
+      </view>
+      <view class="sheet-close" bindtap="onPickerClose"><ic name="close" size="28" /></view>
+    </view>
+
+    <scroll-view scroll-y class="picker-scroll">
+      <view class="ns-config">
+        <view class="ns-model-row" bindtap="onNsModelOpen">
+          <view class="pick-ico"><ic name="theme" size="28" /></view>
+          <view class="grow pick-copy">
+            <view class="ns-model-top">
+              <text class="pick-name">模型</text>
+              <text wx:if="{{nsModelError}}" class="ns-err">加载失败</text>
+            </view>
+            <view class="pick-path ellipsis">{{nsModelLoading ? '读取默认模型…' : (nsModel || '跟随服务器默认')}}{{nsProviderName ? ' · ' + nsProviderName : ''}}</view>
+          </view>
+          <view class="pick-go"><ic name="chevron-right" size="22" /></view>
+        </view>
+        <view class="ns-reason">
+          <view class="ns-reason-top">
+            <view class="ns-reason-title"><ic name="info" size="20" /><text>推理强度</text></view>
+            <text class="ns-reason-cur">{{nsReasoningAvailable ? nsReasoningLabel : '不支持'}}</text>
+          </view>
+          <scroll-view wx:if="{{nsReasoningAvailable}}" scroll-x class="ns-levels" enhanced show-scrollbar="{{false}}">
+            <view
+              wx:for="{{nsReasoningLevels}}"
+              wx:key="id"
+              class="ns-level {{item.id === nsReasoning ? 'on' : ''}}"
+              data-id="{{item.id}}"
+              bindtap="onNsReasoning"
+            >{{item.label}}</view>
+          </scroll-view>
+          <view wx:else class="ns-reason-off">当前模型不支持调整推理强度</view>
+        </view>
+      </view>
+
+      <view class="picker-label">工作空间</view>
+      <view class="pick-row pick-default" data-cwd="{{defaultCwd}}" bindtap="onPickWorkspace">
+        <view class="pick-ico"><ic name="folder" size="30" /></view>
+        <view class="grow pick-copy">
+          <view class="pick-name">默认工作空间</view>
+          <view class="pick-path ellipsis">{{defaultCwdShort || defaultCwd || '服务器默认目录'}}</view>
+        </view>
+        <view class="pick-go"><ic name="chevron-right" size="22" /></view>
+      </view>
+
+      <block wx:if="{{recentWs.length}}">
+        <view class="picker-label">最近使用</view>
+        <view
+          wx:for="{{recentWs}}"
+          wx:key="cwd"
+          class="pick-row"
+          data-cwd="{{item.cwd}}"
+          bindtap="onPickWorkspace"
+        >
+          <view class="pick-ico soft"><ic name="folder" size="28" /></view>
+          <view class="grow pick-copy">
+            <view class="pick-name ellipsis">{{item.name}}</view>
+            <view class="pick-path ellipsis">{{item.short}}</view>
+          </view>
+          <view class="pick-go"><ic name="chevron-right" size="22" /></view>
+        </view>
+      </block>
+
+      <view class="picker-label">其它</view>
+      <view class="pick-row" bindtap="onBrowse">
+        <view class="pick-ico soft"><ic name="search" size="28" /></view>
+        <view class="grow pick-copy">
+          <view class="pick-name">浏览服务器目录</view>
+          <view class="pick-path">从文件系统中选择文件夹</view>
+        </view>
+        <view class="pick-go"><ic name="chevron-right" size="22" /></view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- new-session model picker --------------------------------------->
+  <view wx:if="{{nsModelOpen}}" class="mask" bindtap="onNsModelClose"></view>
+  <view wx:if="{{nsModelOpen}}" class="sheet-panel ns-model-sheet" catchtouchmove="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">选择模型</view>
+      <view class="ns-head-actions">
+        <view class="ns-refresh {{nsModelLoading ? 'spin' : ''}}" bindtap="onNsRefresh">
+          <ic name="refresh" size="26" />
+        </view>
+        <view class="sheet-close" bindtap="onNsModelClose"><ic name="close" size="30" /></view>
+      </view>
+    </view>
+    <view class="ns-sub">
+      <text class="ellipsis">{{nsModel || '读取默认模型…'}}{{nsProviderName ? ' · ' + nsProviderName : ''}}</text>
+    </view>
+    <view class="ns-search-box">
+      <ic name="search" size="26" />
+      <input
+        class="ns-search-input"
+        value="{{nsSearch}}"
+        bindinput="onNsSearch"
+        placeholder="搜索全部模型"
+        placeholder-class="ph"
+        confirm-type="search"
+      />
+      <view wx:if="{{nsSearch}}" class="ns-search-clear" bindtap="onNsSearchClear">
+        <ic name="close" size="20" />
+      </view>
+    </view>
+    <scroll-view scroll-x class="ns-providers" enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{nsProviders}}"
+        wx:key="slug"
+        class="ns-prov {{item.slug === nsPickProvider ? 'on' : ''}}"
+        data-slug="{{item.slug}}"
+        bindtap="onNsProvider"
+      >
+        <view wx:if="{{item.current}}" class="ns-prov-dot"></view>
+        <text>{{item.name}}</text>
+        <text class="ns-prov-count">{{item.total}}</text>
+      </view>
+    </scroll-view>
+    <scroll-view scroll-y class="ns-list-scroll" enhanced show-scrollbar="{{false}}">
+      <view wx:if="{{nsModelLoading && !nsProviders.length}}" class="ns-state">
+        <view class="ns-spinner"></view>
+        <text>正在加载模型…</text>
+      </view>
+      <view wx:elif="{{nsModelError && !nsProviders.length}}" class="ns-state">
+        <text class="ns-state-text">{{nsModelError}}</text>
+        <view class="ns-retry" bindtap="onNsRefresh">重新加载</view>
+      </view>
+      <view wx:elif="{{!nsList.length}}" class="ns-state">
+        <text>没有匹配的模型</text>
+      </view>
+      <view wx:else class="ns-list">
+        <view
+          wx:for="{{nsList}}"
+          wx:key="key"
+          class="ns-pick-row {{item.current ? 'on' : ''}}"
+          data-model="{{item.model}}"
+          data-slug="{{item.slug}}"
+          data-current="{{item.current}}"
+          bindtap="onNsPick"
+          hover-class="tap-hover"
+        >
+          <view class="ns-pick-copy">
+            <text class="ns-pick-name">{{item.label}}</text>
+            <text wx:if="{{item.sub}}" class="ns-pick-sub">{{item.sub}}</text>
+          </view>
+          <view wx:if="{{item.reasoning || item.fast}}" class="ns-tags">
+            <text wx:if="{{item.reasoning}}" class="ns-tag">推理</text>
+            <text wx:if="{{item.fast}}" class="ns-tag fast">快速</text>
+          </view>
+          <view wx:if="{{item.current}}" class="ns-cur">
+            <ic name="check" size="24" />
+            <text>已选</text>
+          </view>
+        </view>
+        <view wx:if="{{nsListMore}}" class="ns-more">仅显示前 200 个匹配结果，请补充搜索关键词</view>
+      </view>
+    </scroll-view>
+    <view class="ns-note">选择将在新建会话时生效</view>
+  </view>
+
+  <!-- theme ---------------------------------------------------------->
+  <view wx:if="{{showTheme}}" class="mask" bindtap="onThemeClose"></view>
+  <view wx:if="{{showTheme}}" class="theme-sheet">
+    <view class="sheet-handle"></view>
+    <view class="theme-sheet-head">
+      <view class="theme-sheet-title">主题外观</view>
+      <view class="tiny muted">即点即换</view>
+    </view>
+    <view class="theme-grid">
+      <view
+        wx:for="{{themeOptions}}"
+        wx:key="id"
+        class="theme-card {{item.id === theme ? 'theme-card-on' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onThemePick"
+      >
+        <view class="swatch" style="background: {{item.swatch}}">
+          <view class="swatch-dot" style="background: {{item.accent}}"></view>
+        </view>
+        <view class="theme-name">{{item.name}}</view>
+        <view class="theme-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <filesheet
+    id="filesheet"
+    show="{{fsShow}}"
+    endpoint="{{endpoint}}"
+    root-path="{{fsRoot}}"
+    profile="{{profile}}"
+    mode="pick"
+    title="选择工作空间"
+    bindclose="onFsClose"
+    bindpick="onFsPick"
+  />
+</view>

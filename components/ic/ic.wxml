@@ -1,0 +1,7 @@
+<view class="ic-wrap" style="width:{{size}}rpx;height:{{size}}rpx;--ic-scale:{{size / 36}};">
+  <view class="ic ic-{{name}}">
+    <view class="a"></view>
+    <view class="b"></view>
+    <view class="c"></view>
+  </view>
+</view>

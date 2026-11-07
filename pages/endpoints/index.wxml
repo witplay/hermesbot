@@ -1,0 +1,121 @@
+<view class="app" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+    <view class="grid"></view>
+  </view>
+
+  <view class="screen page landing">
+    <view class="hero">
+      <view class="row between">
+        <view class="brand">
+          <view class="brand-orb">
+            <image class="brand-orb-img" src="/images/avatar.jpeg" mode="aspectFill" />
+            <view class="orb-ring"></view>
+          </view>
+          <view class="brand-text">
+            <view class="brand-name">HERMES</view>
+            <view class="brand-sub">REMOTE INTELLIGENCE</view>
+          </view>
+        </view>
+        <view class="icon-pill" bindtap="onThemeOpen"><ic name="theme" size="32" /></view>
+      </view>
+
+      <view class="hero-copy">
+        <view class="hero-title">远程智能中枢</view>
+        <view class="hero-desc">随时连接你的 Hermes 实例，处理对话与任务</view>
+      </view>
+
+      <view class="stats">
+        <view class="stat">
+          <view class="stat-num">{{items.length}}</view>
+          <view class="stat-label">站点</view>
+        </view>
+        <view class="stat-sep"></view>
+        <view class="stat">
+          <view class="stat-num accent">{{online}}</view>
+          <view class="stat-label">在线</view>
+        </view>
+        <view class="stat-sep"></view>
+        <view class="stat">
+          <view class="stat-num small-num">{{themeName || '极光'}}</view>
+          <view class="stat-label">主题</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-head row between">
+      <view class="section-title">我的站点</view>
+      <view class="tiny muted">长按管理</view>
+    </view>
+
+    <view wx:if="{{ready && items.length === 0}}" class="empty-state card">
+      <view class="empty-orb"><ic name="plus" size="40" /></view>
+      <view class="empty-title">还没有站点</view>
+      <view class="tiny muted">添加一个 Hermes 服务地址与账号即可开始</view>
+      <view class="btn btn-primary empty-btn" bindtap="onAdd">添加站点</view>
+    </view>
+
+    <view
+      wx:for="{{items}}"
+      wx:key="id"
+      class="card site-card"
+      data-id="{{item.id}}"
+      bindtap="onTap"
+      bindlongpress="onLongPress"
+    >
+      <view class="site-rail"></view>
+      <view class="row between">
+        <view class="row grow">
+          <view class="status-mark">
+            <view class="dot dot-{{item.status}} {{item.status === 'checking' ? 'dot-pulse' : ''}}"></view>
+          </view>
+          <view class="grow">
+            <view class="ep-label ellipsis">{{item.label}}</view>
+            <view class="ep-url ellipsis">{{item.baseUrl}}</view>
+          </view>
+        </view>
+        <view class="status-pill status-{{item.status}}">{{item.statusText}}</view>
+      </view>
+      <view class="site-foot row between">
+        <view class="tiny muted">最近：{{item.lastUsedText}}</view>
+        <view class="site-enter">进入<ic name="chevron-right" size="20" /></view>
+      </view>
+    </view>
+
+    <view wx:if="{{items.length}}" class="add-card" bindtap="onAdd">
+      <view class="add-orb"><ic name="plus" size="30" /></view>
+      <view class="grow">
+        <view class="add-title">添加站点</view>
+        <view class="tiny muted">连接另一个 Hermes 实例</view>
+      </view>
+      <view class="add-caret"><ic name="chevron-right" size="24" /></view>
+    </view>
+
+    <view class="landing-foot tiny">令牌保存在本机 · 过期自动续期</view>
+  </view>
+
+  <view wx:if="{{showTheme}}" class="mask" bindtap="onThemeClose"></view>
+  <view wx:if="{{showTheme}}" class="theme-sheet">
+    <view class="sheet-handle"></view>
+    <view class="theme-sheet-head">
+      <view class="theme-sheet-title">主题外观</view>
+      <view class="tiny muted">即点即换</view>
+    </view>
+    <view class="theme-grid">
+      <view
+        wx:for="{{themeOptions}}"
+        wx:key="id"
+        class="theme-card {{item.id === theme ? 'theme-card-on' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onThemePick"
+      >
+        <view class="swatch" style="background: {{item.swatch}}">
+          <view class="swatch-dot" style="background: {{item.accent}}"></view>
+        </view>
+        <view class="theme-name">{{item.name}}</view>
+        <view class="theme-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+</view>

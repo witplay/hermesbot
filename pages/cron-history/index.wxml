@@ -1,0 +1,77 @@
+<view class="app hist-app" style="{{themeVars}}">
+  <view class="backdrop">
+    <view class="blob blob-a"></view>
+    <view class="blob blob-b"></view>
+  </view>
+
+  <view class="screen hist-body">
+    <view class="hist-head">
+      <view class="hist-head-ico"><ic name="clock" size="28" /></view>
+      <view class="grow hist-head-copy">
+        <view class="hist-head-name ellipsis">{{jobName || '定时任务'}}</view>
+        <view class="hist-head-sub ellipsis">{{scheduleText || '运行历史'}} · 已加载 {{items.length}} 条</view>
+      </view>
+      <view class="hist-refresh {{loading ? 'spin' : ''}}" bindtap="onRetry">
+        <ic name="refresh" size="24" />
+      </view>
+    </view>
+
+    <scroll-view
+      wx:if="{{!error}}"
+      scroll-y
+      class="hist-scroll"
+      enhanced
+      show-scrollbar="{{false}}"
+      lower-threshold="180"
+      refresher-enabled="{{true}}"
+      refresher-triggered="{{refreshing}}"
+      bindrefresherrefresh="onRefresh"
+      bindscrolltolower="onLoadMore"
+    >
+      <view wx:if="{{loading && !items.length}}" class="hist-skeleton">
+        <view class="sk hist-sk"></view>
+        <view class="sk hist-sk"></view>
+        <view class="sk hist-sk"></view>
+        <view class="sk hist-sk"></view>
+        <view class="sk hist-sk"></view>
+      </view>
+
+      <block wx:elif="{{items.length}}">
+        <view class="hist-list">
+          <cronrow
+            wx:for="{{items}}"
+            wx:key="id"
+            item="{{item}}"
+            bindopen="onOpen"
+          />
+        </view>
+
+        <view class="hist-foot">
+          <block wx:if="{{loadingMore}}">
+            <view class="hist-mini-spin"></view>
+            <text>正在加载更早的记录…</text>
+          </block>
+          <text wx:elif="{{moreError}}" class="hist-foot-link" bindtap="onMoreRetry">{{moreError}}</text>
+          <text wx:elif="{{!hasMore}}">没有更早的记录了</text>
+          <text wx:else>继续上滑加载更早的记录</text>
+        </view>
+      </block>
+
+      <view wx:else class="hist-empty">
+        <view class="hist-empty-orb"><ic name="clock" size="46" /></view>
+        <view class="hist-empty-title">还没有运行记录</view>
+        <view class="hist-empty-sub">任务执行后，每次运行的会话会按时间显示在这里</view>
+      </view>
+    </scroll-view>
+
+    <view wx:else class="hist-error-wrap">
+      <view class="hist-error-card">
+        <view class="hist-error-orb"><ic name="info" size="40" /></view>
+        <view class="hist-error-title">暂时没有读到历史记录</view>
+        <view class="hist-error-sub">{{error}}</view>
+        <view class="hist-error-tip">任务刚运行完时可以稍后再试，或下拉刷新</view>
+        <view class="btn btn-ghost hist-error-btn" bindtap="onRetry">重新加载</view>
+      </view>
+    </view>
+  </view>
+</view>

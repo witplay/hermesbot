@@ -1,0 +1,74 @@
+# HermesBot — WeChat Mini Program client for Hermes
+
+A native WeChat mini program that talks to your self-hosted [Hermes](https://hermes-agent.nousresearch.com/docs) agent dashboard. Browse sessions, continue a chat, manage cron jobs and workspaces, on a phone.
+
+微信小程序客户端，用来连接你自己部署的 Hermes 智能体面板：查看会话、继续对话、管理定时任务与工作区。
+
+This is a **client only**. It ships no backend, no model keys, and no hosted service — it connects to an endpoint you provide at runtime.
+
+## Features
+
+| Page | What it does |
+|---|---|
+| `launch` | Restores the last endpoint + session, resumes where you left off |
+| `endpoints` / `endpoint-form` | Add, edit, test multiple Hermes endpoints (scheme + host + port); per-endpoint credentials |
+| `sessions` | Session list with rename, delete, pin, and workspace filtering |
+| `chat` | Conversation view, streaming-ish message rendering with a small local markdown renderer, model + reasoning-level pickers, prompt enhancer, file sheet, audio transcription |
+| `cron-form` / `cron-history` | Create / edit scheduled jobs and read their run history |
+| `components/ic`, `components/filesheet`, `components/navigation-bar` | Icon set, attachment sheet, custom nav bar |
+
+## Authentication
+
+Three paths, all at runtime — nothing is stored in the source:
+
+1. **Password login** — `POST /auth/password-login` with a manual cookie jar, then exchange the PKCE loopback code at `/auth/native/token` (the dashboard only returns the code when its broker cookie rides along, and `wx.request` does not persist cookies, so the jar is hand-rolled).
+2. **Bearer tokens** returned directly in the response body.
+3. **Refresh** — `/auth/native/refresh`, with the token bound to its origin (scheme + host + port): after you edit an endpoint, an old token is never sent to the new origin.
+
+Tokens live in `wx` local storage via `utils/store.js`, keyed per endpoint (`hermes.endpoint.v1`), with a migration step on launch.
+
+## Configure
+
+1. Open the project in WeChat DevTools (miniprogram, not mini-game).
+2. In `project.config.json`, replace `appid` with your own mini program AppID:
+   ```json
+   "appid": "wxYOUR_APPID_HERE"
+   ```
+   The AppID shipped here is a placeholder on purpose. Any AppID you see in a public repo belongs to its owner — using someone else's will fail at compile time.
+3. If you build for a phone, add your endpoint domain to **开发管理 → 开发设置 → 服务器域名** (request 合法域名) — mini programs refuse arbitrary hosts at runtime, and `127.0.0.1` only works with "不校验合法域名" enabled in the dev tools.
+4. Enter your endpoint in the app: `https://your-hermes-host[:port]`, then log in.
+
+## Local storage keys
+
+| Key | Contents |
+|---|---|
+| `hermes.endpoints.v1` | endpoint list (label, baseUrl, optional path prefix) |
+| `hermes.token.v1:<origin>` | access / refresh token per origin |
+| `hermes.last.v1` | last endpoint + session (resume target) |
+| `hermes.enhance.v1` | prompt-enhancer settings (optional API base + key you enter yourself) |
+| `hermes.theme.v1` | theme choice |
+
+## Structure
+
+```
+app.js / app.json / app.wxss       app shell, page registry, global styles
+pages/                             one folder per screen (js/json/wxml/wxss)
+components/                        ic icons, filesheet attachment sheet, navigation-bar
+utils/auth.js                      PKCE + password login + refresh
+utils/http.js                      request wrapper, cookie jar, bearer injection
+utils/store.js                     endpoint/token storage, origin binding
+utils/gateway.js                   gateway request helpers
+utils/cron.js sessionsops.js workspaces.js drafts.js files.js last.js
+utils/models.js enhance.js markdown.js sha256.js theme.js util.js
+```
+
+## Notes and limits
+
+- The prompt enhancer calls an OpenAI-compatible endpoint **you configure yourself** (default suggestion: `https://api.deepseek.com/v1`); without a key it stays disabled.
+- Audio transcription uses the dashboard's own endpoint (`/api/audio/transcribe`), so it needs a Hermes instance that exposes it.
+- No analytics, no third-party SDKs, no telemetry.
+- WeChat mini programs can't use `wss` sockets on some older base library versions; the chat page degrades to polling.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

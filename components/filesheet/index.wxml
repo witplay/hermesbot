@@ -1,0 +1,159 @@
+<view class="fs-root">
+  <view wx:if="{{show}}" class="fs-mask" bindtap="onMask" catchtouchmove="noop"></view>
+  <view wx:if="{{show}}" class="fs-sheet">
+    <view class="fs-handle"></view>
+
+    <view class="fs-head">
+      <view wx:if="{{previewOpen}}" class="fs-icon-btn" bindtap="onPreviewClose">
+        <ic name="back" size="30" />
+      </view>
+      <view class="grow fs-head-copy">
+        <view class="fs-title ellipsis">{{previewOpen ? preview.title : title}}</view>
+        <view class="fs-sub ellipsis">{{previewOpen ? preview.path : (path || '正在定位默认目录…')}}</view>
+      </view>
+      <view class="fs-icon-btn" bindtap="onClose">
+        <ic name="close" size="30" />
+      </view>
+    </view>
+
+    <block wx:if="{{!previewOpen}}">
+      <view class="fs-pathbar">
+        <view class="fs-icon-btn tiny-btn" bindtap="onUp">
+          <ic name="chevron-up" size="26" />
+        </view>
+        <scroll-view scroll-x class="fs-crumbs" scroll-into-view="{{crumbAnchor}}" scroll-with-animation>
+          <block wx:for="{{visibleCrumbs}}" wx:key="id">
+            <view wx:if="{{item.more}}" id="{{item.id}}" class="fs-more" bindtap="onPathExpand">
+              <ic name="more" size="26" />
+            </view>
+            <view
+              wx:else
+              id="{{item.id}}"
+              class="fs-crumb {{item.on ? 'on' : ''}}"
+              data-index="{{item.index}}"
+              bindtap="onCrumb"
+            >
+              <text class="fs-crumb-label">{{item.name}}</text>
+            </view>
+            <view
+              wx:if="{{item.sep}}"
+              id="{{item.sepId}}"
+              class="fs-sep {{ddAnchor === item.sepId ? 'on' : ''}}"
+              data-index="{{item.sepIndex}}"
+              data-sep="{{item.sepId}}"
+              bindtap="onCrumbMenu"
+            >
+              <ic name="chevron-down" size="22" />
+            </view>
+          </block>
+        </scroll-view>
+        <view wx:if="{{pathTruncated && pathExpanded}}" class="fs-collapse" bindtap="onPathCollapse">收起</view>
+        <view class="fs-icon-btn tiny-btn" bindtap="onRefresh">
+          <ic name="refresh" size="26" />
+        </view>
+      </view>
+
+      <scroll-view scroll-y class="fs-list" scroll-into-view="{{topAnchor}}">
+        <view id="topA" class="fs-anchor"></view>
+        <view id="topB" class="fs-anchor"></view>
+
+        <view wx:if="{{loading}}" class="fs-state">
+          <view class="dot dot-warn dot-pulse"></view>
+          <text class="fs-state-txt">加载目录…</text>
+        </view>
+        <view wx:elif="{{error}}" class="fs-state fs-state-err">
+          <text class="fs-state-txt">{{error}}</text>
+          <view class="btn btn-ghost fs-retry" bindtap="onRefresh">重试</view>
+        </view>
+        <view wx:elif="{{!entries.length}}" class="fs-state">
+          <view class="fs-empty-ico"><ic name="folder" size="58" /></view>
+          <text class="fs-state-txt">目录为空</text>
+        </view>
+        <view wx:else class="fs-entries">
+          <view
+            wx:for="{{entries}}"
+            wx:key="path"
+            id="fsrow{{index}}"
+            class="fs-row {{index === focusIndex ? 'fs-row-focus' : ''}}"
+            data-index="{{index}}"
+            bindtap="onEntry"
+          >
+            <view class="fs-ico {{item.isDirectory ? 'dir' : (item.isImage ? 'img' : 'file')}}">
+              <ic name="{{item.isDirectory ? 'folder' : (item.isImage ? 'image' : 'file')}}" size="32" />
+            </view>
+            <view class="grow fs-row-copy">
+              <view class="fs-name ellipsis">{{item.name}}</view>
+              <view class="fs-meta">{{item.extLabel}}</view>
+            </view>
+            <view wx:if="{{item.isDirectory}}" class="fs-chev">
+              <ic name="chevron-right" size="24" />
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view wx:if="{{mode === 'pick'}}" class="fs-pick">
+        <view class="grow fs-pick-copy">
+          <view class="tiny muted">已选择目录</view>
+          <view class="fs-pick-path ellipsis">{{path}}</view>
+        </view>
+        <view class="btn btn-primary fs-pick-btn" bindtap="onPick" hover-class="fs-pick-press">
+          <view class="fs-pick-ico"><ic name="check-circle" size="32" /></view>
+          <text class="fs-pick-txt">使用此目录</text>
+        </view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="fs-pv-tools">
+        <view class="tiny muted">文本预览</view>
+        <view class="fs-pv-copy" bindtap="onPreviewCopy">
+          <ic name="copy" size="26" />
+          <text class="fs-pv-copy-txt">复制</text>
+        </view>
+      </view>
+      <scroll-view scroll-y class="fs-pv">
+        <view wx:if="{{preview.loading}}" class="fs-state"><text class="fs-state-txt">读取中…</text></view>
+        <view wx:elif="{{preview.error}}" class="fs-state fs-state-err"><text class="fs-state-txt">{{preview.error}}</text></view>
+        <text wx:else class="fs-pv-text" user-select="{{true}}">{{preview.text}}</text>
+      </scroll-view>
+      <view wx:if="{{preview.truncated}}" class="fs-trunc">内容过长，仅显示前 512KB</view>
+      <view class="fs-pv-actions">
+        <view class="btn btn-primary" bindtap="onPreviewDownload">下载文件</view>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{show && ddOpen}}" class="fs-dd-scrim" catchtap="onDdClose" catchtouchmove="noop"></view>
+  <view wx:if="{{show && ddOpen}}" class="fs-dd" style="left:{{ddLeft}}px; top:{{ddTop}}px; width:{{ddWidth}}px;">
+    <view class="fs-dd-head">
+      <view class="fs-dd-kicker">切换到子目录</view>
+      <view class="fs-dd-path ellipsis">{{ddPath}}</view>
+    </view>
+    <scroll-view scroll-y class="fs-dd-scroll" scroll-into-view="{{ddScroll}}">
+      <view wx:if="{{ddLoading}}" class="fs-dd-state">
+        <view class="dot dot-warn dot-pulse"></view>
+        <text>加载子目录…</text>
+      </view>
+      <view wx:elif="{{ddError}}" class="fs-dd-state fs-dd-err"><text>{{ddError}}</text></view>
+      <view wx:elif="{{!ddDirs.length}}" class="fs-dd-state"><text>没有子目录</text></view>
+      <block wx:else>
+        <view
+          wx:for="{{ddDirs}}"
+          wx:key="path"
+          id="ddrow{{index}}"
+          class="fs-dd-row {{item.current ? 'on' : ''}}"
+          data-path="{{item.path}}"
+          bindtap="onDirPick"
+        >
+          <view class="fs-dd-ico"><ic name="folder" size="28" /></view>
+          <view class="grow fs-dd-name ellipsis">{{item.name}}</view>
+          <view wx:if="{{item.current}}" class="fs-dd-cur">
+            <ic name="check" size="24" />
+            <text class="fs-dd-cur-txt">当前</text>
+          </view>
+        </view>
+      </block>
+    </scroll-view>
+  </view>
+</view>

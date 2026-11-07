@@ -1,0 +1,9 @@
+{
+  "navigationStyle": "custom",
+  "disableScroll": true,
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "filesheet": "/components/filesheet/index",
+    "cronrow": "/components/cronrow/index"
+  }
+}

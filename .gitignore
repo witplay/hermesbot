@@ -1,0 +1,12 @@
+node_modules/
+miniprogram_npm/
+typings/
+.idea/
+.vscode/
+.DS_Store
+*.log
+project.private.config.json
+
+/hermesapi.txt
+/GVzvLlOOj0.txt
+/DeepSeekPic.jpeg
