@@ -71,4 +71,15 @@ utils/models.js enhance.js markdown.js sha256.js theme.js util.js
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Use it, fork it, ship it commercially; keep the copyright notice.
+
+## Trademark and affiliation
+
+The MIT license covers the **source code only**. It does not grant rights to the *HermesBot*
+name or the app icon — a fork should ship under its own name so users don't mistake it for
+the original.
+
+This is an independent client. It is **not affiliated with or endorsed by Nous Research**;
+"Hermes" and "Hermes Agent" belong to their respective owner.
+
+协议只覆盖代码，不含名称与图标；本项目是独立客户端，与 Nous Research 无隶属关系。
