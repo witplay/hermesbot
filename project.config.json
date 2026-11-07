@@ -18,18 +18,6 @@
   "packOptions": {
     "ignore": [
       {
-        "type": "file",
-        "value": "DeepSeekPic.jpeg"
-      },
-      {
-        "type": "file",
-        "value": "hermesapi.txt"
-      },
-      {
-        "type": "file",
-        "value": "GVzvLlOOj0.txt"
-      },
-      {
         "type": "suffix",
         "value": ".log"
       }
