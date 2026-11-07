@@ -81,8 +81,17 @@ own domain. That part I do as a paid service, plus custom work on top of this co
 | 白标改版 | 换名称 / 主题 / 图标 / 入口，做成你自有品牌的小程序 |
 | 二次开发 | 接你的业务接口、加页面、私有化改造 |
 
-**联系方式**：在本仓库开一个 issue，标题写 `[商业合作]` 或 `[commercial]`，48 小时内回复。
-Please open an issue titled `[commercial]` — that's the fastest channel.
+**联系方式 / Contact**
+
+- **微信客服（企业微信）** — [点此直接对话](https://work.weixin.qq.com/kfid/kfcd871154619f798d8)　国内用户优先走这个
+- **GitHub issue** — 标题写 `[商业合作]` 或 `[commercial]`，48 小时内回复（海外用户走这个）
+
+<details>
+<summary>扫码添加微信客服 · WeChat support QR</summary>
+
+<img src="docs/wechat-support.png" alt="WeCom customer service QR code" width="200">
+
+</details>
 
 ## License
 
