@@ -10,3 +10,6 @@ project.private.config.json
 /hermesapi.txt
 /GVzvLlOOj0.txt
 /DeepSeekPic.jpeg
+
+# real-device screenshots kept local, never publish
+docs/screenshots/raw/

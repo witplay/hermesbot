@@ -17,6 +17,23 @@ This is a **client only**. It ships no backend, no model keys, and no hosted ser
 | `cron-form` / `cron-history` | Create / edit scheduled jobs and read their run history |
 | `components/ic`, `components/filesheet`, `components/navigation-bar` | Icon set, attachment sheet, custom nav bar |
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/public/01-sites.jpg" width="210"><br><sub>站点 · Endpoints</sub></td>
+    <td align="center"><img src="docs/screenshots/public/02-sessions.jpg" width="210"><br><sub>会话 · Sessions</sub></td>
+    <td align="center"><img src="docs/screenshots/public/03-new-session.jpg" width="210"><br><sub>新建会话 · New session</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/public/04-cron.jpg" width="210"><br><sub>定时任务 · Cron</sub></td>
+    <td align="center"><img src="docs/screenshots/public/05-model-switch.jpg" width="210"><br><sub>切换模型 · Model picker</sub></td>
+    <td align="center"><img src="docs/screenshots/public/06-themes.jpg" width="210"><br><sub>主题 · Themes</sub></td>
+  </tr>
+</table>
+
+Screenshots use placeholder data (example endpoints and sessions).
+
 ## Authentication
 
 Three paths, all at runtime — nothing is stored in the source:
